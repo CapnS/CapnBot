@@ -1,0 +1,309 @@
+import discord
+from discord.ext import commands
+import bs4
+import twilio
+import urllib.request
+import html
+import matplotlib
+import io
+import textwrap
+import traceback
+from contextlib import redirect_stdout
+import time
+
+
+class Plural:
+    def __init__(self, **attr):
+        iterator = attr.items()
+        self.name, self.value = next(iter(iterator))
+
+    def __str__(self):
+        v = self.value
+        if v == 0 or v > 1:
+            return f'{v} {self.name}s'
+        return f'{v} {self.name}'
+
+def human_join(seq, delim=', ', final='or'):
+    size = len(seq)
+    if size == 0:
+        return ''
+    if size == 1:
+        return seq[0]
+    if size == 2:
+        return f'{seq[0]} {final} {seq[1]}'
+
+    return delim.join(seq[:-1]) + f' {final} {seq[-1]}'
+
+class TabularData:
+    def __init__(self):
+        self._widths = []
+        self._columns = []
+        self._rows = []
+
+    def set_columns(self, columns):
+        self._columns = columns
+        self._widths = [len(c) + 2 for c in columns]
+
+    def add_row(self, row):
+        rows = [str(r) for r in row]
+        self._rows.append(rows)
+        for index, element in enumerate(rows):
+            width = len(element) + 2
+            if width > self._widths[index]:
+                self._widths[index] = width
+
+    def add_rows(self, rows):
+        for row in rows:
+            self.add_row(row)
+
+    def render(self):
+        sep = '+'.join('-' * w for w in self._widths)
+        sep = f'+{sep}+'
+
+        to_draw = [sep]
+
+        def get_entry(d):
+            elem = '|'.join(f'{e:^{self._widths[i]}}' for i, e in enumerate(d))
+            return f'|{elem}|'
+
+        to_draw.append(get_entry(self._columns))
+        to_draw.append(sep)
+
+        for row in self._rows:
+            to_draw.append(get_entry(row))
+
+        to_draw.append(sep)
+        return '\n'.join(to_draw)
+
+class Misc():
+
+    def __init__(self, bot):
+        self.bot = bot
+        self._last_result = None
+
+    def cleanup_code(self, content):
+        """Automatically removes code blocks from the code."""
+        # remove ```py\n```
+        if content.startswith('```') and content.endswith('```'):
+            return '\n'.join(content.split('\n')[1:-1])
+
+        # remove `foo`
+        return content.strip('` \n')
+
+    @commands.command()
+    async def echo(self, ctx, *, repeat):
+        await ctx.send(repeat)
+
+    @commands.command()
+    async def eval(self, ctx, *, body: str):
+        """Evaluates a code"""
+        if not ctx.author.id == 422181415598161921:
+            return
+        env = {
+            'bot': self.bot,
+            'ctx': ctx,
+            'channel': ctx.channel,
+            'author': ctx.author,
+            'guild': ctx.guild,
+            'message': ctx.message,
+            '_': self._last_result
+        }
+
+        env.update(globals())
+
+        body = self.cleanup_code(body)
+        stdout = io.StringIO()
+
+        to_compile = f'async def func():\n{textwrap.indent(body, "  ")}'
+
+        try:
+            exec(to_compile, env)
+        except Exception as e:
+            return await ctx.send(f'```py\n{e.__class__.__name__}: {e}\n```')
+
+        func = env['func']
+        try:
+            with redirect_stdout(stdout):
+                ret = await func()
+        except Exception as e:
+            value = stdout.getvalue()
+            await ctx.send(f'```py\n{value}{traceback.format_exc()}\n```')
+        else:
+            value = stdout.getvalue()
+            try:
+                await ctx.message.add_reaction('\u2705')
+            except:
+                pass
+
+            if ret is None:
+                if value:
+                    await ctx.send(f'```py\n{value}\n```')
+            else:
+                self._last_result = ret
+                await ctx.send(f'```py\n{value}{ret}\n```')
+    @commands.command()
+    async def embed(self, ctx, color_name, *, user_input):
+        '-> Embeds a message' 
+        try:
+            embed = discord.Embed(title=user_input, color = int(color_name,16))
+            return await ctx.send(embed=embed)
+        except:
+            pass
+        try:
+            hex = matplotlib.colors.cnames[color_name]
+        except:
+            return await ctx.send("Not a valid color")
+        hex1 = hex[1:]
+        hex2 = int(hex1, 16)
+        embed = discord.Embed(title=user_input, color = hex2)
+        await ctx.send(embed=embed)
+
+    @commands.command(hidden=True)
+    async def sql(self, ctx, *, query: str):
+        """Run some SQL."""
+        if not ctx.author.id == 422181415598161921:
+            return
+        query = self.cleanup_code(query)
+
+        is_multistatement = query.count(';') > 1
+        if is_multistatement:
+            # fetch does not support multiple statements
+            strategy = self.bot.db.execute
+        else:
+            strategy = self.bot.db.fetch
+
+        try:
+            start = time.perf_counter()
+            results = await strategy(query)
+            dt = (time.perf_counter() - start) * 1000.0
+        except Exception:
+            return await ctx.send(f'```py\n{traceback.format_exc()}\n```')
+
+        rows = len(results)
+        if is_multistatement or rows == 0:
+            return await ctx.send(f'`{dt:.2f}ms: {results}`')
+
+        headers = list(results[0].keys())
+        table = TabularData()
+        table.set_columns(headers)
+        table.add_rows(list(r.values()) for r in results)
+        render = table.render()
+
+        fmt = f'```\n{render}\n```\n*Returned {Plural(row=rows)} in {dt:.2f}ms*'
+        if len(fmt) > 2000:
+            fp = io.BytesIO(fmt.encode('utf-8'))
+            await ctx.send('Too many results...', file=discord.File(fp, 'results.txt'))
+        else:
+            await ctx.send(fmt)
+    @commands.command()
+    async def embed_colors(self,ctx):
+        '''Shows all possible colors for the Embed command'''
+        all_colors = []
+        msg = ""
+        for color in matplotlib.colors.cnames.keys():
+            all_colors.append(color)
+        for color in all_colors:
+            msg = f"{msg}, {color}"
+        await ctx.send(f"``{msg}``")
+
+    @commands.command()
+    async def ud(self, ctx, search):
+        '-> Searches UD'
+        try:
+            search2 = search.replace(' ', '+')
+            urb_url = 'http://www.urbandictionary.com/define.php?term=' + str(search2)
+            urban = urllib.request.urlopen(urb_url).read().decode('utf-8')
+            soup_urb = bs4.BeautifulSoup(urban, 'html.parser')
+            try:
+                q2 = soup_urb.find('div', class_='meaning').text
+                REPLACEMENTS = [('&quot;', '"'), ('&apos;', "'")]
+                for (entity, replacement) in REPLACEMENTS:
+                    q2 = str(q2).replace(entity, replacement)
+                await ctx.send('{0}: {1}'.format(search, q2))
+            except AttributeError as e:
+                await ctx.send('The word was not found')
+        except urllib.error.HTTPError:
+            await ctx.send('Word Not Found')
+
+    @commands.command()
+    async def pin(self, ctx):
+        'Pins last message'
+        await ctx.message.delete()
+        if ctx.author.guild_permissions.administrator:
+            async for message in ctx.channel.history(limit=1):
+                await message.pin()
+
+    @commands.command()
+    async def text(self, ctx, message):
+        'Texts Me'
+        if ctx.author.id == 422181415598161921:
+            await ctx.send('Permission Granted')
+        else:
+            await ctx.send("No you cant text me!")
+            return
+        account_sid = 'AC8bfb14dd77f7ebfbbd2db1fedfac13f7'
+        auth_token = 'ca929258fa42b0ddef3dc3a2cda8c45c'
+        client = Client(account_sid, auth_token)
+        message = client.messages.create(to='+17133928748', from_='+18328649532', body=str(message))
+        print(message.sid)
+
+    @commands.command()
+    async def joindm(self, ctx, *, args):
+        'Changes the DM users get when they join'
+        if (not ctx.author.guild_permissions.administrator):
+            await ctx.send('Not enough Permissions')
+            return
+        found = False
+        guild = ctx.guild.id
+        with open('Files/DM File.txt', 'r') as dm_file:
+            lines = dm_file.readlines()
+            dm_dict = {
+                
+            }
+            lol = 2
+            for i in range(len(lines) - 1):
+                if (i % 2) == 1:
+                    dm_dict.update({
+                        '\n' + lines[i].strip(): lines[lol],
+                    })
+                    lol = lol + 2
+                    for key in dm_dict.keys():
+                        if key == ('\n' + str(guild)):
+                            found = True
+                            dm_dict[key] = str(args)
+                            value_list = []
+                            for value in dm_dict.values():
+                                value_list.append(str('\n' + str(value).strip()))
+            dm_file.close()
+        if (not found):
+            dm_dict.update({
+                '\n' + str(ctx.guild.id): args,
+            })
+            value_list = []
+            for value in dm_dict.values():
+                value_list.append(str('\n' + str(value).strip()))
+        with open('Files/DM File.txt', 'w') as dm_file:
+            i = 0
+            for key in dm_dict.keys():
+                dm_file.write(key)
+                dm_file.write(value_list[i])
+                i = i + 1
+            dm_file.close()
+        await ctx.send('The DM sent to users when they join has been set')
+
+    @commands.command()
+    async def donate(self, ctx):
+        '''Sends a link to donate to me'''
+        await ctx.send('Thank you for Thinking about Donating {}. '.format(str(ctx.author.mention)))
+        await ctx.send('Here is the Donation Link:')
+        await ctx.send('https://paypal.me/trgcapn')
+
+    @commands.command()
+    async def donors(self, ctx):
+        '''Shows a  list of Donors'''
+        em = discord.Embed()
+        em.add_field(name='All Donors', value='Name\nAnother Name\n')
+        await ctx.send(content=None, embed=em)
+
+def setup(bot):
+    bot.add_cog(Misc(bot))
