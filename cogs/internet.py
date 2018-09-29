@@ -98,5 +98,35 @@ class Internet():
         search_results = re.findall('href=\\"\\/watch\\?v=(.{11})', html_content.read().decode())
         await ctx.channel.send('http://www.youtube.com/watch?v=' + search_results[0])
 
+    @commands.command()
+    async def weather(self,ctx,*,city):
+        '''gets weather data for a city'''
+        replaced = city.replace(' ',"%20")
+        data = await self.bot.db.fetchrow("SELECT * FROM keys;")
+        key = data['weather_key']
+        auth = {'Authorization':key}
+        async with aiohttp.ClientSession(headers=auth) as session:
+            async with session.get(f'http://api.openweathermap.org/data/2.5/weather?q={replaced}&units=imperial&appid={key}') as resp:
+                text =await resp.json()
+        weather = text['weather'][0]['main']
+        icon = text['weather'][0]['icon']
+        temp = text['main']['temp'] 
+        humidity = text['main']['humidity']
+        pressure = text['main']['pressure']
+        wind = text['wind']['speed']
+        clouds = text['clouds']['all']
+        blue = discord.Color.blue()
+        em = discord.Embed(title = "Weather Stats",description = city, color=blue)
+        em.set_thumbnail(url =f'http://openweathermap.org/img/w/{icon}.png')
+        em.set_footer(text="Requested by "+ ctx.author.name, icon_url= ctx.author.avatar_url)
+        em.add_field(name="Forecast",value=weather)
+        em.add_field(name="Temperature",value=f'{temp}°F')
+        em.add_field(name='Humidity',value= f'{humidity}%')
+        em.add_field(name="Pressure", value = f'{pressure}hPa')
+        em.add_field(name="Wind Speed", value = f'{wind}mph')
+        em.add_field(name="Cloud Cover",value = f'{clouds}% cloudy')
+        await ctx.send(embed=em)
+
+
 def setup(bot):
     bot.add_cog(Internet(bot))

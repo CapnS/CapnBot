@@ -12,6 +12,7 @@ class Games():
 
     def __init__(self, bot):
         self.bot = bot
+        
     @commands.command()
     async def trbmb(self,ctx):
         async with aiohttp.ClientSession() as session:

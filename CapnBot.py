@@ -40,16 +40,15 @@ async def get_prefixes(bot,msg):
 
 
 print(discord.__version__)
-bot = commands.Bot(command_prefix= get_prefixes, pm_help=True)
+bot = commands.Bot(command_prefix= get_prefixes)
 
 async def set_up_token():
     credentials = {"user": "zachary", "password": "capn", "database": "capnbot", "host": "127.0.0.1"}
     db = await asyncpg.create_pool(**credentials) 
     data = await db.fetchrow("SELECT * FROM keys;")
     global TOKEN
-    #TEST
     TOKEN = data["test_token"]
-    TOKEN = data["real_token"]
+    #TOKEN = data["real_token"]
 
 
 
