@@ -59,10 +59,13 @@ class Internet():
         api_key = data["api_key"]
         cse_id = data["cse_id"]
         '''Google search'''
-        if ctx.channel.is_nsfw():
+        try:
+            if ctx.channel.is_nsfw():
+                safe = "off"
+            else:
+                safe = "high"
+        except AttributeError:
             safe = "off"
-        else:
-            safe = "high"
         results = self.google(str(search), api_key, cse_id, num=1, safe = safe)
         for result in results:
             await ctx.send(result['link'])
@@ -78,10 +81,13 @@ class Internet():
         api_key = data["api_key"]
         cse_id = data["cse_id"]
         '''Image search for something'''
-        if ctx.channel.is_nsfw():
+        try:
+            if ctx.channel.is_nsfw():
+                safe = "off"
+            else:
+                safe = "high"
+        except AttributeError:
             safe = "off"
-        else:
-            safe = "high"
         results = self.google(str(search), api_key, cse_id, searchType = "image", num=1, safe = safe)
         for result in results:
             image = result["link"]
