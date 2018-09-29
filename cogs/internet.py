@@ -55,7 +55,7 @@ class Internet():
 
     @commands.command(aliases = ["google"])
     async def g(self, ctx,*, search):
-        data = await db.fetchrow("SELECT * FROM keys;")
+        data = await self.bot.db.fetchrow("SELECT * FROM keys;")
         api_key = data["api_key"]
         cse_id = data["cse_id"]
         '''Google search'''
@@ -74,7 +74,7 @@ class Internet():
 
     @commands.command(aliases=["image"])
     async def i(self,ctx,*,search):
-        data = await db.fetchrow("SELECT * FROM keys;")
+        data = await self.bot.db.fetchrow("SELECT * FROM keys;")
         api_key = data["api_key"]
         cse_id = data["cse_id"]
         '''Image search for something'''
