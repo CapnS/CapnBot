@@ -302,7 +302,7 @@ class Misc():
     async def donors(self, ctx):
         '''Shows a  list of Donors'''
         em = discord.Embed()
-        em.add_field(name='All Donors', value='Name\nAnother Name\n')
+        em.add_field(name='All Donors', value='Jear')
         await ctx.send(content=None, embed=em)
 
 def setup(bot):
