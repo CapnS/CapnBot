@@ -299,10 +299,28 @@ class Misc():
         await ctx.send('https://paypal.me/trgcapn')
 
     @commands.command()
+    async def updatedonors(self, ctx, amount:float, *, name):
+        data = await self.bot.db.fetch("SELECT * from donors WHERE name = $1;",name)
+        if not data:
+            await self.bot.db.execute("INSERT INTO donors VALUES ($1, $2);",name,amount)
+            return await ctx.send(f"Added {name} to Donor List")
+        else:
+            previous = data["amount"]
+            current = previous + amount
+            await self.bot.db.execute("UPDATE donors SET amount=$1 WHERE name=$2;",current,name)
+            return await ctx.send(f"Updated {name}'s Donation amount to ${current}")
+
+    @commands.command()
     async def donors(self, ctx):
         '''Shows a  list of Donors'''
+        data = await self.bot.db.fetch("SELECT * FROM donors;")
+        msg = ""
+        for donor in data:
+            donor_name = donor["name"]
+            amount = donor["amount"]
+            msg = f"{msg}\n {donor_name}-${amount}"
         em = discord.Embed()
-        em.add_field(name='All Donors', value='Jear')
+        em.add_field(name='All Donors', value=msg)
         await ctx.send(content=None, embed=em)
 
 def setup(bot):
