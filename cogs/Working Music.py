@@ -309,18 +309,19 @@ class Music:
         vc = ctx.voice_client
         requester = vc.source.requester
         voter = ctx.message.author
-        dj = discord.utils.get(ctx.guild.roles, name='Muted')
         if not vc or not vc.is_connected():
             return await ctx.send('I am not currently playing anything!', delete_after=20)
         if vc.is_paused():
             pass
         elif not vc.is_playing():
             return
+        for role in voter.roles:
+            if role.name == "DJ":
+                await ctx.send("DJ asked to skip song, now skipping.")
+                vc.stop()
+                return
         if voter == requester:
             await ctx.send("Requester asked to skip song, now skipping.")
-            vc.stop()
-        elif dj in voter.roles:
-            await ctx.send("DJ asked to skip song, now skipping.")
             vc.stop()         
         elif voter not in self.votes:
             self.votes.append(voter)
