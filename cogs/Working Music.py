@@ -318,10 +318,12 @@ class Music:
         for role in voter.roles:
             if role.name == "DJ":
                 await ctx.send("DJ asked to skip song, now skipping.")
+                self.votes = []
                 vc.stop()
                 return
         if voter == requester:
             await ctx.send("Requester asked to skip song, now skipping.")
+            self.votes = []
             vc.stop()         
         elif voter not in self.votes:
             self.votes.append(voter)
