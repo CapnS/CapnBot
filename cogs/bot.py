@@ -4,6 +4,7 @@ import psutil
 import time
 import inspect
 import os
+import dweepy 
 
 class BotInfo():
     def __init__(self,bot):

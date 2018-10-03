@@ -92,6 +92,13 @@ class CommandErrorHandler:
         await ctx.message.add_reaction("\U0000274c")
         print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+        tb=traceback.format_exception(type(error), error, error.__traceback__)
+        msg=''
+        for x in tb:
+            msg= msg + x
+        red = discord.Color.red()
+        em = discord.Embed(title="Error",description=msg, color = red)
+        await ctx.send(embed=em,delete_after=20)
 
 def setup(bot):
     bot.add_cog(CommandErrorHandler(bot))
