@@ -97,12 +97,18 @@ class Internet():
     @commands.command()
     async def yt(self, ctx,*, search):
         '''Looks on youtube for something'''
-        query_string = urllib.parse.urlencode({
-            'search_query': str(search),
-        })
-        html_content = urllib.request.urlopen('http://www.youtube.com/results?' + query_string)
-        search_results = re.findall('href=\\"\\/watch\\?v=(.{11})', html_content.read().decode())
-        await ctx.channel.send('http://www.youtube.com/watch?v=' + search_results[0])
+        data = await self.bot.db.fetchrow("SELECT * FROM keys;")
+        api_key = data["api_key"]
+        url = "https://www.googleapis.com/youtube/v3/search"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, params={"type": "video","q": search, "part": "snippet","key": api_key}) as resp:
+                data = await resp.json()
+        if data["items"]:
+            video = data["items"][0]
+            response = "https://youtu.be/" + video["id"]["videoId"]
+        else:
+            response = "This video was not found"
+        await ctx.send(response)
 
     @commands.command()
     async def weather(self,ctx,*,city):
