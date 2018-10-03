@@ -21,6 +21,7 @@ import json
 import atexit
 import dweepy
 import asyncpg
+import os
 
 
 async def get_prefixes(bot,msg):
@@ -134,51 +135,6 @@ async def pong(ctx):
     em.set_footer(text=f"Requested by {ctx.author.name}",icon_url=ctx.author.avatar_url)
     await ctx.send(embed=em)
 
-'''
-@bot.event
-async def on_member_join(member):
-    "-> Dm's user on join"
-    found = False
-    guild = member.guild.id
-    with open('Files/DM File.txt', 'r') as dm_file:
-        lines = dm_file.readlines()
-        dm_dict = {
-            
-        }
-        lol = 2
-        for i in range(len(lines) - 1):
-            if (i % 2) == 1:
-                dm_dict.update({
-                    '\n' + lines[i].strip(): lines[lol],
-                })
-                lol = lol + 2
-                for key in dm_dict.keys():
-                    if key == ('\n' + str(guild)):
-                        found = True
-                        dm_message = dm_dict[key]
-                        value_list = []
-                        for value in dm_dict.values():
-                            value_list.append(str('\n' + str(value).strip()))
-        dm_file.close()
-    if (not found):
-        dm_dict.update({
-            '\n' + str(guild): 'Welcome to the Server, Enjoy your Stay!',
-        })
-        dm_message = 'Welcome to the Server, Enjoy your Stay'
-        value_list = []
-        for value in dm_dict.values():
-            value_list.append(str('\n' + str(value).strip()))
-    with open('Files/DM File.txt', 'w') as dm_file:
-        i = 0
-        for key in dm_dict.keys():
-            dm_file.write(key)
-            dm_file.write(value_list[i])
-            i = i + 1
-        dm_file.close()
-    await member.send(dm_message)
-    role = discord.utils.get(member.guild.roles, name='Gay')
-    await member.add_roles(role)
-'''
 
 def get_channel(channel_name):
     for channel in bot.get_all_channels():
@@ -186,35 +142,7 @@ def get_channel(channel_name):
             return channel
     return None
 
-async def webserver():
-    await bot.wait_until_ready()
-    while not bot.is_closed():
-        try:
-            dweep = dweepy.get_latest_dweet_for('CapnBot')[0]
-            dweet = dweep['content']
-            message = dweet['msg']
-            if message != bot.webmessage:
-                user = await bot.get_user_info(422181415598161921)
-                await user.send(message)
-                bot.webmessage = message
-        except dweepy.DweepyError:
-            pass
-        await asyncio.sleep(5)
-'''
-@bot.command()
-async def background(ctx, interval):
-    '-> Runs in the background'
-    if ctx.author.guild_permissions.administrator:
-        await bot.wait_until_ready()
-        counter = 0
-        general_channel = get_channel('general')
-        while (not bot.is_closed):
-            counter += 1
-            await general_channel.send('Follow my twitch @ https://twitch.tv/trgcapn')
-            await asyncio.sleep(interval ** 60)
-    else:
-        await general_channel.send('Permission Denied')
-'''
+
 @bot.command()
 async def quit(ctx):
     '''Quits bot'''
@@ -222,6 +150,40 @@ async def quit(ctx):
         await bot.close()
     else:
         await ctx.send('Permission Denied')
+
+@bot.command()
+async def load(ctx, extension_name: str):
+    'Loads an extension.'
+    if not ctx.author.id == 422181415598161921:
+        return
+    cog = "cogs."+extension_name
+    bot.load_extension(cog)
+    await ctx.send('{} loaded.'.format(extension_name))
+
+@bot.command()
+async def unload(ctx,cog):
+    '''Unloads an Extension'''
+    if not ctx.author.id == 422181415598161921:
+        return
+    cog = "cogs."+cog
+    bot.unload_extension(cog)
+    await ctx.message.add_reaction("\U00002705")
+    
+@bot.command()
+async def reload(ctx,*,cog):
+    '''Reloads an Extension'''
+    if not ctx.author.id == 422181415598161921:
+        return
+    if cog == "all":
+        for cogs in bot.cogs:
+            bot.unload_extension(cogs)
+            bot.load_extension(cogs)
+            await ctx.message.add_reaction("\U00002705")
+        return
+    cog = "cogs."+cog
+    bot.unload_extension(cog)
+    bot.load_extension(cog)
+    await ctx.message.add_reaction("\U00002705")
 
 @bot.command()
 async def notifyall(ctx, *, args):
@@ -232,6 +194,12 @@ async def notifyall(ctx, *, args):
         for channel in guild.channels:
             if isinstance(channel, discord.TextChannel):
                 await channel.send(args)
+
+@commands.command()
+async def upvote(self,ctx):
+    '''Sends a link to upvote my bot'''
+    await ctx.send("https://discordbots.org/bot/448915931507458048")
+
 
 async def _get_owner():
     bot.owner = (await bot.application_info()).owner
@@ -277,90 +245,10 @@ async def on_ready():
     print(bot.user.id)
     print('------')
 
-'''
-@bot.event
-async def on_member_update(before, after):
-    if str(before.id) == 422181415598161921:
-        if str(before.status) != 'online':
-            if str(after.status) == 'online':
-                await get_channel('general').send(after.mention + ' is online')
-    if str(before.id) == 122744849920294913:
-        if str(before.status) != 'online':
-            if str(after.status) == 'online':
-                await get_channel('general').send(after.mention + ' is a faggot')
-'''
 @bot.event
 async def on_message_edit(before,after):
     await bot.process_commands(after)
     
-@bot.command()
-async def load(ctx, extension_name: str):
-    'Loads an extension.'
-    if not ctx.author.id == 422181415598161921:
-        return
-    cog = "cogs."+extension_name
-    bot.load_extension(cog)
-    await ctx.send('{} loaded.'.format(extension_name))
-
-@bot.command()
-async def unload(ctx,cog):
-    '''Unloads an Extension'''
-    if not ctx.author.id == 422181415598161921:
-        return
-    cog = "cogs."+cog
-    bot.unload_extension(cog)
-    await ctx.message.add_reaction("\U00002705")
-    
-@bot.command()
-async def reload(ctx,*,cog):
-    '''Reloads an Extension'''
-    if not ctx.author.id == 422181415598161921:
-        return
-    if cog == "all":
-        for cogs in bot.cogs:
-            bot.unload_extension(cogs)
-            bot.load_extension(cogs)
-            await ctx.message.add_reaction("\U00002705")
-        return
-    cog = "cogs."+cog
-    bot.unload_extension(cog)
-    bot.load_extension(cog)
-    await ctx.message.add_reaction("\U00002705")
-
-
-async def spam_resistance():
-    bot.messages = {}
-    messages = []
-    await bot.wait_until_ready()
-    while not bot.is_closed():
-        past_ten_seconds = datetime.datetime.utcnow()-datetime.timedelta(seconds=10)
-        for guild in bot.guilds:
-            if guild.name in ["Discord Bot List","discord.py"]:
-                pass
-            else:
-                for channel in guild.channels:
-                    if isinstance(channel, discord.TextChannel):
-                        try:
-                            async for message in channel.history(after=past_ten_seconds):
-                                if not message.author.bot:
-                                    if not message.author.id == 422181415598161921:
-                                        messages.append(message.author.id)
-                            try:
-                                bot.messages[channel]=messages
-                            except KeyError:
-                                bot.messages.update({channel:messages})
-                            messages = []
-                        except:
-                            pass
-        asyncio.sleep(1)
-
-
-@commands.command()
-async def upvote(self,ctx):
-    '''Sends a link to upvote my bot'''
-    await ctx.send("https://discordbots.org/bot/448915931507458048")
-
-
 @bot.event
 async def on_message(message):
     if (message.author.bot):
@@ -395,44 +283,6 @@ async def on_message(message):
     if message.author.id in bot.blacklist:
         return
     await bot.process_commands(message)
-    '''
-    if message.author.id in bot.userDict:
-        values = bot.userDict[message.author.id]
-        experience = int(values[0])
-        level = int(values[1])
-        num = random.randint(0, 15)
-        experience = experience + num
-        if experience > (level ** 4):
-            level = level + 1
-            await message.channel.send(f'{message.author.mention} just leveled up to level {level}!!!')
-        bot.userDict[message.author.id] = [experience, level]
-    else:
-        experience = 0
-        level = 1
-        bot.userDict.update({
-            message.author.id: [experience, level],
-        })
-    with open('Files/Experience.txt', 'w') as f:
-        json.dump(bot.userDict, f)
-    '''
-        
-    
-'''
-@bot.command()
-async def XP(ctx):
-    if ctx.author.id in bot.userDict:
-        values = bot.userDict[ctx.author.id]
-        experience = int(values[0])
-        level = int(values[1])
-        await ctx.send(f'You are level {level} with {experience} XP.)
-    else:
-        experience = 0
-        level = 1
-        await ctx.send(f'You are now level {level} with {experience} XP.)
-        bot.userDict.update({
-            ctx.author.id: [experience, level],
-        })
-'''
 
 @bot.event
 async def on_command(ctx):
@@ -441,6 +291,48 @@ async def on_command(ctx):
     uses+=1
     await bot.db.execute("UPDATE commands SET uses=$1 WHERE command_name=$2;",uses,ctx.command.qualified_name)
     bot.counter += 1
+
+async def spam_resistance():
+    bot.messages = {}
+    messages = []
+    await bot.wait_until_ready()
+    while not bot.is_closed():
+        past_ten_seconds = datetime.datetime.utcnow()-datetime.timedelta(seconds=10)
+        for guild in bot.guilds:
+            if guild.name in ["Discord Bot List","discord.py"]:
+                pass
+            else:
+                for channel in guild.channels:
+                    if isinstance(channel, discord.TextChannel):
+                        try:
+                            async for message in channel.history(after=past_ten_seconds):
+                                if not message.author.bot:
+                                    if not message.author.id == 422181415598161921:
+                                        messages.append(message.author.id)
+                            try:
+                                bot.messages[channel]=messages
+                            except KeyError:
+                                bot.messages.update({channel:messages})
+                            messages = []
+                        except:
+                            pass
+        asyncio.sleep(1)
+
+async def webserver():
+    await bot.wait_until_ready()
+    while not bot.is_closed():
+        try:
+            dweep = dweepy.get_latest_dweet_for('CapnBot')[0]
+            dweet = dweep['content']
+            message = dweet['msg']
+            if message != bot.webmessage:
+                user = await bot.get_user_info(422181415598161921)
+                await user.send(message)
+                bot.webmessage = message
+        except dweepy.DweepyError:
+            pass
+        await asyncio.sleep(5)
+
 
 bot.loop.run_until_complete(set_up_token())
 bot.loop.create_task(webserver())
