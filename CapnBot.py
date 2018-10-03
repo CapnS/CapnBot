@@ -49,7 +49,7 @@ async def set_up_token():
     data = await db.fetchrow("SELECT * FROM keys;")
     global TOKEN
     TOKEN = data["test_token"]
-    #TOKEN = data["real_token"]
+    TOKEN = data["real_token"]
 
 
 
