@@ -147,8 +147,9 @@ class Twitter():
                 return message.author == ctx.author
             answer = await self.bot.wait_for('message', check=check,timeout=30)
             if answer.clean_content == 'y':
-                api.update_status(Message)
-                await ctx.send('Tweeted: ' + Message)
+                status = api.update_status(Message)
+                status_id = status.id_str
+                await ctx.send("Link to your tweet: https://twitter.com/TRGCapn/status/"+status_id)
             else:
                 await ctx.send("Didn't Tweet")
         else:
@@ -173,8 +174,9 @@ class Twitter():
                     return message.author == ctx.author
                 answer = await self.bot.wait_for('message', check = check,timeout=30)
                 if answer.clean_content == 'y':
-                    api.retweet(tweet.id)
-                    await ctx.send(str(tweet.user.name) + ' was Retweeted!')
+                    status = api.retweet(tweet.id)
+                    status_id = status.id_str
+                    await ctx.send('Link to your Retweet: https://twitter.com/TRGCapn/status/'+status_id)
                 else:
                     await ctx.send("Didn't Retweet")
                     return
