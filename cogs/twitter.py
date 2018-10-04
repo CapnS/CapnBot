@@ -169,8 +169,9 @@ class Twitter():
             auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
             auth.set_access_token(access_token, access_token_secret)
             api = tweepy.API(auth)
-            num = random.randint(0,100)
-            tweet = api.search(search)[num]
+            tweets = api.search(search)
+            num = random.randint(0,(len(search)-1))
+            tweet = tweets[num]
             await ctx.send((str(tweet.user.name) + ' tweeted ') + str(tweet.text))
             await ctx.send('Do you want to retweet this? (y/n)')
             def check(message):
