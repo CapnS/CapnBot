@@ -102,7 +102,7 @@ class BotInfo():
     async def stats(self,ctx,command=None):
         if command:
             data = await self.bot.db.fetchrow("SELECT * FROM commands WHERE command_name=$1;",command)
-            if data = None:
+            if data == None:
                 return await ctx.send("Not a valid command")
             uses = data["uses"]
             return await ctx.send(f"{uses} uses")
