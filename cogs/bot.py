@@ -105,7 +105,7 @@ class BotInfo():
             if data == None:
                 return await ctx.send("Not a valid command")
             uses = data["uses"]
-            return await ctx.send(f"{uses} uses")
+            return await ctx.send(f"{command} has {uses} uses")
         data = await self.bot.db.fetch("SELECT * FROM commands ORDER BY uses DESC LIMIT 10;")
         leaderboard = ""
         i=1
