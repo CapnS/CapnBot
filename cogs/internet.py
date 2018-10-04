@@ -8,12 +8,12 @@ import re
 from forex_python.converter import CurrencyRates
 from forex_python.bitcoin import BtcConverter
 import sys
-
+import asyncurban
 
 
 c = CurrencyRates()
 b = BtcConverter()
-
+u = asyncurban.UrbanDictionary()
 
 class Internet():
 
@@ -139,24 +139,20 @@ class Internet():
         em.add_field(name="Cloud Cover",value = f'{clouds}% cloudy')
         await ctx.send(embed=em)
 
-    @commands.command()
-    async def ud(self, ctx, search):
+    @commands.group(invoke_without_command=True)
+    async def ud(self, ctx):
         '-> Searches UD'
-        try:
-            search2 = search.replace(' ', '+')
-            urb_url = 'http://www.urbandictionary.com/define.php?term=' + str(search2)
-            urban = urllib.request.urlopen(urb_url).read().decode('utf-8')
-            soup_urb = bs4.BeautifulSoup(urban, 'html.parser')
-            try:
-                q2 = soup_urb.find('div', class_='meaning').text
-                REPLACEMENTS = [('&quot;', '"'), ('&apos;', "'")]
-                for (entity, replacement) in REPLACEMENTS:
-                    q2 = str(q2).replace(entity, replacement)
-                await ctx.send('{0}: {1}'.format(search, q2))
-            except AttributeError as e:
-                await ctx.send('The word was not found')
-        except urllib.error.HTTPError:
-            await ctx.send('Word Not Found')
-            
+        pass
+    
+    @ud.command()
+    async def random(self,ctx):
+        word = await u.get_random()
+        await ctx.send(f"{word} - {word.definition}")
+    
+    @ud.command()
+    async def search(self,ctx,*,query):
+        word = await u.get_word(query)
+        await ctx.send(f"{word} - {word.definition}")
+
 def setup(bot):
     bot.add_cog(Internet(bot))
