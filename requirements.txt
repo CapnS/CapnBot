@@ -14,3 +14,4 @@ dblpy
 youtube_dl
 jishaku
 asyncurban
+gitpython
