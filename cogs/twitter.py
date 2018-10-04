@@ -17,6 +17,7 @@ class Twitter():
         access_token = data["tweepy_token"]
         access_token_secret = data["tweepy_secret"]
         def go():
+            message = ""
             auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
             auth.set_access_token(access_token, access_token_secret)
             api = tweepy.API(auth)
@@ -33,6 +34,7 @@ class Twitter():
                 try:
                     tweet.user.follow()
                     user_followed = tweet.user.name
+                    message = message + user_followed + "\n"
                 except tweepy.TweepError as e:
                     print(e.reason)
                 except StopIteration:
@@ -41,7 +43,9 @@ class Twitter():
                     sleep(5)
         if ctx.author.id == 422181415598161921:
             await self.bot.loop.run_in_executor(None,go)
-            await ctx.send("Finished Following")
+            blue = discord.Color.blue()
+            em = discord.Embed(title = "Followed Users",description = message,color = blue)
+            await ctx.send(embed=em)
         else:
             return
 
@@ -54,6 +58,7 @@ class Twitter():
         access_token = data["tweepy_token"]
         access_token_secret = data["tweepy_secret"]
         def go():
+            message = ""
             auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
             auth.set_access_token(access_token, access_token_secret)
             api = tweepy.API(auth)
@@ -69,9 +74,12 @@ class Twitter():
                         sleep(1)
                     user = str(api.get_user(f).screen_name)
                     api.destroy_friendship(f)
+                    message = message + user + "\n"
         if ctx.author.id == 422181415598161921:
             await self.bot.loop.run_in_executor(None,go)
-            await ctx.send("Finished Unfollowing")
+            blue = discord.Color.blue()
+            em = discord.Embed(title = "Unfollowed Users",description = message,color = blue)
+            await ctx.send(embed=em)
         else:
             return
     '''
@@ -119,7 +127,7 @@ class Twitter():
         except tweepy.TweepError as e:
             await ctx.send(e.reason)
     '''
-    
+
     @commands.command()
     async def tweet(self, ctx,*, Message):
         'Tweets for me'
