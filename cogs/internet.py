@@ -142,7 +142,7 @@ class Internet():
     @commands.group(invoke_without_command=True)
     async def ud(self, ctx):
         '-> Searches UD'
-        pass
+        await ctx.send("missing argument")
     
     @ud.command()
     async def random(self,ctx):
