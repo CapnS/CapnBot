@@ -361,10 +361,15 @@ class Games():
             self.Won=False
 
     def horcheck_won(self,grids, player):
+        amount=0
         for grid in grids:
-            amount = sum(1 for x in grid if x == player)
-            if amount >= 4:
-                return True
+            for x in grid:
+                if x == player:
+                    amount+=1
+                    if amount >= 4:
+                        return True
+                else:
+                    amount=0   
         return False
 
     def vertcheck_won(self,grids,player,n):
