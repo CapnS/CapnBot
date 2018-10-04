@@ -5,7 +5,7 @@ import discord
 import difflib
 import json
 from asyncpg import exceptions
-
+import asyncio
 
 class CommandErrorHandler:
     def __init__(self, bot):
@@ -69,6 +69,8 @@ class CommandErrorHandler:
         elif isinstance(error, exceptions.NotNullViolationError):
             return await ctx.send(f"User is not in the system. Use {ctx.prefix}start")
 
+        elif isinstance(error, asyncio.TimeoutError):
+            return
 
         elif isinstance(error, commands.NoPrivateMessage):
             try:
