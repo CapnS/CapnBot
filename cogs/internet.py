@@ -139,6 +139,24 @@ class Internet():
         em.add_field(name="Cloud Cover",value = f'{clouds}% cloudy')
         await ctx.send(embed=em)
 
-
+    @commands.command()
+    async def ud(self, ctx, search):
+        '-> Searches UD'
+        try:
+            search2 = search.replace(' ', '+')
+            urb_url = 'http://www.urbandictionary.com/define.php?term=' + str(search2)
+            urban = urllib.request.urlopen(urb_url).read().decode('utf-8')
+            soup_urb = bs4.BeautifulSoup(urban, 'html.parser')
+            try:
+                q2 = soup_urb.find('div', class_='meaning').text
+                REPLACEMENTS = [('&quot;', '"'), ('&apos;', "'")]
+                for (entity, replacement) in REPLACEMENTS:
+                    q2 = str(q2).replace(entity, replacement)
+                await ctx.send('{0}: {1}'.format(search, q2))
+            except AttributeError as e:
+                await ctx.send('The word was not found')
+        except urllib.error.HTTPError:
+            await ctx.send('Word Not Found')
+            
 def setup(bot):
     bot.add_cog(Internet(bot))

@@ -5,6 +5,7 @@ import time
 import inspect
 import os
 import dweepy 
+import git 
 
 class BotInfo():
     def __init__(self,bot):
@@ -40,7 +41,7 @@ class BotInfo():
                 fmt = '{d}d ' + fmt
         return fmt.format(d=days, h=hours, m=minutes, s=seconds)
 
-    @commands.command()
+    @commands.command(aliases=["about"])
     @commands.guild_only()
     async def botinfo(self, ctx):
         'Gives Bot Info'
@@ -52,12 +53,13 @@ class BotInfo():
         me = ctx.me
         all_guilds = []
         memory_usage = self.process.memory_full_info().uss / (1024 ** 2)
-        cpu_usage = self.process.cpu_percent() / psutil.cpu_count()
         uptime = self.get_uptime(brief=True)
         for guild in self.bot.guilds:
             all_guilds.append(guild)
         total_members = sum(1 for _ in self.bot.get_all_members())
-        capn = await self.bot.get_user_info(422181415598161921)        
+        capn = await self.bot.get_user_info(422181415598161921)
+        repo = git.Repo(r"C:/Users/zacha/Downloads/CapnBot/CapnBot")
+        commit = repo.head.commit.message    
         em = discord.Embed(title = "Bot Info", description = f"[Bot Invite](https://discordapp.com/oauth2/authorize?&client_id={self.bot.user.id}&scope=bot&permissions=8) | [Support Server](https://discord.gg/MJV4qsV) | [Source Code](https://github.com/CapnS/CapnBot)")
         em.color = discord.Color.gold()
         em.add_field(name='Bot Name', value=str(me.display_name))
@@ -68,11 +70,12 @@ class BotInfo():
         em.add_field(name='Uptime', value=uptime)
         em.add_field(name = "Prefixes", value = f"``{prefix}``")
         em.add_field(name="Coded By", value = capn.mention)
+        em.add_field(name="Latest Commit",value = f"```css\n{commit}\n```")
         em.set_footer(text='Requested by '+ctx.author.name, icon_url=ctx.author.avatar_url)
         em.set_thumbnail(url=self.bot.user.avatar_url)
         await ctx.send(content=None, embed=em)
 
-    @commands.command(aliases=['sauce', 'sawce'])
+    @commands.command()
     async def source(self, ctx, command: str = None):
         """Get the bot's source link for a command or the whole source"""
 
