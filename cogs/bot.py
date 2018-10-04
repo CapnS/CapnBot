@@ -99,7 +99,13 @@ class BotInfo():
         await ctx.send(f"<{source_url}/tree/master/{location}/#L{firstlineno}-L{firstlineno + len(lines) - 1}>")
 
     @commands.command()
-    async def stats(self,ctx):
+    async def stats(self,ctx,command=None):
+        if command:
+            data = await self.bot.db.fetchrow("SELECT * FROM commands WHERE command_name=$1;",command)
+            if data = None:
+                return await ctx.send("Not a valid command")
+            uses = data["uses"]
+            return await ctx.send(f"{uses} uses")
         data = await self.bot.db.fetch("SELECT * FROM commands ORDER BY uses DESC LIMIT 10;")
         leaderboard = ""
         i=1
