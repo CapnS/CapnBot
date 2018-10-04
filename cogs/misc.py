@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 import bs4
-import twilio
+from twilio.rest import Client
 import urllib.request
 import html
 import matplotlib
@@ -195,6 +195,7 @@ class Misc():
             await ctx.send('Too many results...', file=discord.File(fp, 'results.txt'))
         else:
             await ctx.send(fmt)
+
     @commands.command()
     async def embed_colors(self,ctx):
         '''Shows all possible colors for the Embed command'''
@@ -218,16 +219,14 @@ class Misc():
     @commands.command()
     async def text(self, ctx, message):
         'Texts Me'
-        if ctx.author.id == 422181415598161921:
-            await ctx.send('Permission Granted')
-        else:
-            await ctx.send("No you cant text me!")
+        if not ctx.author.id == 422181415598161921:
             return
-        account_sid = 'AC8bfb14dd77f7ebfbbd2db1fedfac13f7'
-        auth_token = 'ca929258fa42b0ddef3dc3a2cda8c45c'
+        data = await self.bot.db.fetchrow("SELECT * FROM keys;")
+        account_sid=data["sid"]
+        auth_token=data["twilio_token"]
         client = Client(account_sid, auth_token)
-        message = client.messages.create(to='+17133928748', from_='+18328649532', body=str(message))
-        print(message.sid)
+        message = client.messages.create(to='+17133928748', from_='+18329003495', body=str(message))
+        await ctx.send("Your Message has been Sent.")
 
     @commands.command()
     async def joindm(self, ctx, *, args):
