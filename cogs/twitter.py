@@ -68,7 +68,7 @@ class Twitter():
             amount = (- 1)
             followers = api.followers_ids('TRGCapn')
             friends = api.friends_ids('TRGCapn')
-            friends.reverse()
+            friends = friends[::-1]
             for f in friends:
                 if f not in followers:
                     amount = int(amount) + 1
