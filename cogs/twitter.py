@@ -3,6 +3,8 @@ from discord.ext import commands
 import tweepy
 from time import sleep
 import time 
+import random
+
 class Twitter():
 
     def __init__(self, bot):
@@ -156,7 +158,7 @@ class Twitter():
             return
 
     @commands.command()
-    async def retweet(self, ctx, search):
+    async def retweet(self, ctx, *,search):
         'Retweets Something'
         data = await self.bot.db.fetchrow("SELECT * FROM keys;")
         consumer_key = data["tweepy_key"]
@@ -167,20 +169,20 @@ class Twitter():
             auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
             auth.set_access_token(access_token, access_token_secret)
             api = tweepy.API(auth)
-            for tweet in api.search(str(search)):
-                await ctx.send((str(tweet.user.name) + ' tweeted ') + str(tweet.text))
-                await ctx.send('Do you want to retweet this? (y/n)')
-                def check(message):
-                    return message.author == ctx.author
-                answer = await self.bot.wait_for('message', check = check,timeout=30)
-                if answer.clean_content == 'y':
-                    status = api.retweet(tweet.id)
-                    status_id = status.id_str
-                    await ctx.send('Link to your Retweet: https://twitter.com/TRGCapn/status/'+status_id)
-                else:
-                    await ctx.send("Didn't Retweet")
-                    return
-                break
+            num = random.randomint(0,100)
+            tweet = api.search(search)
+            await ctx.send((str(tweet.user.name) + ' tweeted ') + str(tweet.text))
+            await ctx.send('Do you want to retweet this? (y/n)')
+            def check(message):
+                return message.author == ctx.author
+            answer = await self.bot.wait_for('message', check = check,timeout=30)
+            if answer.clean_content == 'y':
+                status = api.retweet(tweet.id)
+                status_id = status.id_str
+                await ctx.send('Link to your Retweet: https://twitter.com/TRGCapn/status/'+status_id)
+            else:
+                await ctx.send("Didn't Retweet")
+                return
         else:
             await ctx.send('Insufficient Permissions')
 

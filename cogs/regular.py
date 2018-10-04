@@ -147,17 +147,17 @@ class Regular():
             await ctx.send('User not found')
 
     @commands.command()
-    async def ban(self, ctx, user: discord.Member, reason):
+    async def ban(self, ctx, user: discord.Member,*, reason):
         'Bans a User'
         try:
             if ctx.author.guild_permissions.administrator:
                 await ctx.send('Banned {}'.format(user.name))
                 await user.send((('You were banned from ' + str(ctx.guild.name)) + ' because ') + reason)
-                await user.ban()
+                await ctx.guild.ban(user)
             else:
                 await ctx.send('Permission Denied.')
-        except discord.ext.commands.errors.BadArgument:
-            await ctx.send('User not found')
+        except :
+            await ctx.send('Failed to Ban')
 
     @commands.command()
     async def unban(self, ctx, user):
