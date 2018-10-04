@@ -286,10 +286,19 @@ async def on_message(message):
 
 @bot.event
 async def on_command(ctx):
-    data = await bot.db.fetchrow("SELECT * FROM commands WHERE command_name = $1;",ctx.command.qualified_name)
+    name = ctx.command.qualified_name
+    if " " in name:
+        msg = ""
+        for char in name:
+            if char != " ":
+                msg = msg+char
+            else:
+                name=msg
+                break
+    data = await bot.db.fetchrow("SELECT * FROM commands WHERE command_name = $1;",name)
     uses = int(data["uses"])
     uses+=1
-    await bot.db.execute("UPDATE commands SET uses=$1 WHERE command_name=$2;",uses,ctx.command.qualified_name)
+    await bot.db.execute("UPDATE commands SET uses=$1 WHERE command_name=$2;",uses,name)
     bot.counter += 1
 
 async def spam_resistance():
