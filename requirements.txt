@@ -16,3 +16,4 @@ jishaku
 asyncurban
 gitpython
 tweepy
+aiogoogletrans

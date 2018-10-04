@@ -9,11 +9,12 @@ from forex_python.converter import CurrencyRates
 from forex_python.bitcoin import BtcConverter
 import sys
 import asyncurban
-
+import aiogoogletrans
 
 c = CurrencyRates()
 b = BtcConverter()
 u = asyncurban.UrbanDictionary()
+t = aiogoogletrans.Translator()
 
 class Internet():
 
@@ -153,6 +154,17 @@ class Internet():
     async def search(self,ctx,*,query):
         word = await u.get_word(query)
         await ctx.send(f"{word} - {word.definition}")
+
+    @commands.command(aliases = ["gt", "trans"])
+    async def translate(self,ctx,lang,*,sentence):
+        data = await t.translate(sentence,dest=lang)
+        translated = data.src.upper()
+        translation = data.text
+        language = lang.upper()
+        green = discord.Color.green()
+        em = discord.Embed(title = f"{translated} -> {language}",description=translation,color = green)
+        em.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar_url)
+        await ctx.send(embed = em)
 
 def setup(bot):
     bot.add_cog(Internet(bot))
