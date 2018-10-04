@@ -265,7 +265,9 @@ class Games():
         green = discord.Color.green()
         msg = ""
         for x in grids:
-            msg = msg + str(x) +"\n"
+            x = str(x)
+            x = x.replace("0","⚪")
+            msg = msg + x + "\n"
         em = discord.Embed(title="Current Board", description= msg,color = green)
         em.set_footer(text=f"{ctx.author}'s Turn")
         message = await ctx.send(embed = em)
@@ -282,7 +284,11 @@ class Games():
             blurple = discord.Color.blurple()
             msg = ""
             for x in grids:
-                msg = msg + str(x) +"\n"
+                x = str(x)
+                x = x.replace("0","⚪")
+                x = x.replace("1", "⚫")
+                x = x.replace("2", "🔴")
+                msg = msg + x + "\n"
             em = discord.Embed(title="Current Board", description= msg,color = blurple)
             if player == 1:
                 mention = ctx.author
@@ -299,16 +305,19 @@ class Games():
             await ctx.send(f"Which coloumn do you want to place your checker in Player {player}(1-{n})")
             if player == 1:
                 def check(message):
-                    return message.author == ctx.author
+                    return message.author == ctx.author and message.clean_content.isdigit()
             else:
                 def check(message):
-                    return message.author == user
-            msg = await self.bot.wait_for('message',check = check,timeout=60)
+                    return message.author == user and message.clean_content.isdigit()
+            try:
+                msg = await self.bot.wait_for('message',check = check,timeout=60)
+            except:
+                return
             msg = msg.clean_content
             try:
                 move = int(msg)
             except ValueError:
-                await ctx.send("Invalid Column number")
+                pass
         num=0
         for grid in grids:
             if num == 0:
@@ -330,9 +339,13 @@ class Games():
         green = discord.Color.green()
         msg = ""
         for x in grids:
-            msg = msg + str(x) +"\n"
+            x = str(x)
+            x = x.replace("0","⚪")
+            x = x.replace("1", "⚫")
+            x = x.replace("2", "🔴")
+            msg = msg + x +"\n"
         em = discord.Embed(title="Current Board", description= msg,color = green)
-        if player == 1:
+        if player == 2:
             mention = ctx.author
         else:
             mention = user
