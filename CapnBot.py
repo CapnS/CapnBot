@@ -299,8 +299,6 @@ async def spam_resistance():
     while not bot.is_closed():
         past_ten_seconds = datetime.datetime.utcnow()-datetime.timedelta(seconds=10)
         for guild in bot.guilds:
-            if guild.name in ["Discord Bot List","discord.py"]:
-                pass
             else:
                 for channel in guild.channels:
                     if isinstance(channel, discord.TextChannel):
