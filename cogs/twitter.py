@@ -41,8 +41,9 @@ class Twitter():
                     break
                 else:
                     sleep(5)
+            return message
         if ctx.author.id == 422181415598161921:
-            await self.bot.loop.run_in_executor(None,go)
+            message = await self.bot.loop.run_in_executor(None,go)
             blue = discord.Color.blue()
             em = discord.Embed(title = "Followed Users",description = message,color = blue)
             await ctx.send(embed=em)
@@ -75,8 +76,9 @@ class Twitter():
                     user = str(api.get_user(f).screen_name)
                     api.destroy_friendship(f)
                     message = message + user + "\n"
+            return message
         if ctx.author.id == 422181415598161921:
-            await self.bot.loop.run_in_executor(None,go)
+            message = await self.bot.loop.run_in_executor(None,go)
             blue = discord.Color.blue()
             em = discord.Embed(title = "Unfollowed Users",description = message,color = blue)
             await ctx.send(embed=em)
