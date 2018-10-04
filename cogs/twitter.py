@@ -68,6 +68,7 @@ class Twitter():
             amount = (- 1)
             followers = api.followers_ids('TRGCapn')
             friends = api.friends_ids('TRGCapn')
+            friends = friends[::-1]
             for f in friends:
                 if f not in followers:
                     amount = int(amount) + 1
@@ -75,9 +76,12 @@ class Twitter():
                         break
                     else:
                         sleep(1)
-                    user = str(api.get_user(f).screen_name)
-                    api.destroy_friendship(f)
-                    message = message + user + "\n"
+                    try:
+                        user = str(api.get_user(f).screen_name)
+                        api.destroy_friendship(f)
+                        message = message + user + "\n"
+                    except:
+                        amount-=1
             return message
         if ctx.author.id == 422181415598161921:
             message = await self.bot.loop.run_in_executor(None,go)
