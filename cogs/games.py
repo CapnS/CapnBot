@@ -314,7 +314,7 @@ class Games():
             if num == 0:
                 if grids[0][move-1] != 0:
                     await ctx.send("That column is full")
-                    self.domove(grids,player,n)
+                    await self.domove(grids,player,n,message,ctx,user)
             if grid[move-1] == 0:
                 if num == n-1:
                     grids[num][move-1]=player
