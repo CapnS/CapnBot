@@ -49,7 +49,7 @@ async def set_up_token():
     data = await db.fetchrow("SELECT * FROM keys;")
     global TOKEN
     TOKEN = data["test_token"]
-    TOKEN = data["real_token"]
+    #TOKEN = data["real_token"]
 
 
 
@@ -222,6 +222,7 @@ async def on_ready():
     bot.load_extension('cogs.chatbot')
     bot.load_extension('cogs.fortnite')
     bot.load_extension('cogs.bot')
+    bot.load_extension('cogs.twitter')
     credentials = {"user": "zachary", "password": "capn", "database": "capnbot", "host": "127.0.0.1"}
     bot.db = await asyncpg.create_pool(**credentials)
     data = await bot.db.fetchrow("SELECT user_id FROM users WHERE blacklisted=true;")
