@@ -28,7 +28,7 @@ class Twitter():
                     if amount == int(times):
                         break
                     else:
-                        sleep(5)
+                        sleep(1)
                 except ValueError:
                     break
                 try:
@@ -40,7 +40,7 @@ class Twitter():
                 except StopIteration:
                     break
                 else:
-                    sleep(5)
+                    sleep(1)
             return message
         if ctx.author.id == 422181415598161921:
             message = await self.bot.loop.run_in_executor(None,go)
