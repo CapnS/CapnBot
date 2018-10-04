@@ -271,7 +271,7 @@ async def on_message(message):
             return await message.channel.send(message.author.mention + " has been muted for spam.")
         except:
             return await message.channel.send("Please stop spamming " + message.author.mention)
-    if user_message_content == 5:
+    if user_message_content == 10:
         try:
             role = discord.utils.get(message.guild.roles,name="Muted")
             await message.author.add_roles(role)
@@ -299,20 +299,23 @@ async def spam_resistance():
     while not bot.is_closed():
         past_ten_seconds = datetime.datetime.utcnow()-datetime.timedelta(seconds=10)
         for guild in bot.guilds:
-            for channel in guild.channels:
-                if isinstance(channel, discord.TextChannel):
-                    try:
-                        async for message in channel.history(after=past_ten_seconds):
-                            if not message.author.bot:
-                                if not message.author.id == 422181415598161921:
-                                    messages.append(message.author.id)
+            if guild.name == ["discord.py"]:
+                pass
+            else:
+                for channel in guild.channels:
+                    if isinstance(channel, discord.TextChannel):
                         try:
-                            bot.messages[channel]=messages
-                        except KeyError:
-                            bot.messages.update({channel:messages})
-                        messages = []
-                    except:
-                        pass
+                            async for message in channel.history(after=past_ten_seconds):
+                                if not message.author.bot:
+                                    if not message.author.id == 422181415598161921:
+                                        messages.append(message.author.id)
+                            try:
+                                bot.messages[channel]=messages
+                            except KeyError:
+                                bot.messages.update({channel:messages})
+                            messages = []
+                        except:
+                            pass
         asyncio.sleep(1)
 
 async def webserver():
