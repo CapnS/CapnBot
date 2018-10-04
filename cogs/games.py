@@ -12,6 +12,7 @@ class Games():
 
     def __init__(self, bot):
         self.bot = bot
+        self.Won = False
         
     @commands.command()
     async def trbmb(self,ctx):
@@ -256,6 +257,125 @@ class Games():
         await ctx.send("Your balance is now "+ str(current))
         await self.bot.db.execute("UPDATE users SET balance=$1 WHERE user_id=$2",current,ctx.author.id)
 
+    @commands.command()
+    async def connect4(self,ctx, user: discord.Member,n:int=4):
+        if n < 4:
+            return await ctx.send("Not a large enough grid.")
+        grids = [[0]*n for _ in range(n)]
+        green = discord.Color.green()
+        msg = ""
+        for x in grids:
+            msg = msg + str(x) +"\n"
+        em = discord.Embed(title="Current Board", description= msg,color = green)
+        em.set_footer(text=f"{ctx.author}'s Turn")
+        message = await ctx.send(embed = em)
+        player = 1
+        await self.domove(grids,player,n,message,ctx,user)
+            
+    async def check_if_won(self,grids,player,n,message,ctx,user):
+        if self.horcheck_won(grids,player) or self.diagcheck_won(grids,player,n) or self.vertcheck_won(grids,player,n):
+            if player == 1:
+                mention = ctx.author
+            else:
+                mention = user
+            await message.delete()
+            blurple = discord.Color.blurple()
+            msg = ""
+            for x in grids:
+                msg = msg + str(x) +"\n"
+            em = discord.Embed(title="Current Board", description= msg,color = blurple)
+            if player == 1:
+                mention = ctx.author
+            else:
+                mention = user
+            em.set_footer(text=f"{mention} won the Game")
+            return await ctx.send(embed = em)
+        await self.print_table(grids,message,ctx,player,user,n)
+
+
+    async def domove(self,grids,player,n,message,ctx,user):
+        move=0
+        while not 0 < move <= n:
+            await ctx.send(f"Which coloumn do you want to place your checker in Player {player}(1-{n})")
+            if player == 1:
+                def check(message):
+                    return message.author == ctx.author
+            else:
+                def check(message):
+                    return message.author == user
+            msg = await self.bot.wait_for('message',check = check,timeout=60)
+            msg = msg.clean_content
+            try:
+                move = int(msg)
+            except ValueError:
+                await ctx.send("Invalid Column number")
+        num=0
+        for grid in grids:
+            if num == 0:
+                if grids[0][move-1] != 0:
+                    await ctx.send("That column is full")
+                    self.domove(grids,player,n)
+            if grid[move-1] == 0:
+                if num == n-1:
+                    grids[num][move-1]=player
+                else:
+                    num+=1
+            else:
+                grids[num-1][move-1]=player
+        await self.check_if_won(grids,player,n,message,ctx,user)
+        
+        
+    async def print_table(self, grids,message,ctx,player,user,n):
+        await message.delete()
+        green = discord.Color.green()
+        msg = ""
+        for x in grids:
+            msg = msg + str(x) +"\n"
+        em = discord.Embed(title="Current Board", description= msg,color = green)
+        if player == 1:
+            mention = ctx.author
+        else:
+            mention = user
+        em.set_footer(text=f"{mention}'s Turn")
+        message=await ctx.send(embed = em)
+        if not self.Won:
+            if player == 1:
+                player = 2
+            else:
+                player = 1
+            await self.domove(grids,player,n,message,ctx,user)
+        else:
+            self.Won=False
+
+    def horcheck_won(self,grids, player):
+        for grid in grids:
+            amount = sum(1 for x in grid if x == player)
+            if amount >= 4:
+                return True
+        return False
+
+    def vertcheck_won(self,grids,player,n):
+        amount = 0
+        for i in range(n):
+            for grid in grids:
+                if grid[i] == player:
+                    amount+=1
+                    if amount >= 4:
+                        return True
+                else:
+                    amount = 0
+        return False
+
+    def diagcheck_won(self,grids, player, n):
+        for x in range(n - 3):
+            for y in range(3, n):
+                if grids[x][y] == player and grids[x+1][y-1] == player and grids[x+2][y-2] == player and grids[x+3][y-3] == player:
+                    return True
+
+        for x in range(n - 3):
+            for y in range(n - 3):
+                if grids[x][y] == player and grids[x+1][y+1] == player and grids[x+2][y+2] == player and grids[x+3][y+3] == player:
+                    return True
 
 
 def setup(bot):
