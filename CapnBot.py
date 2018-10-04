@@ -299,21 +299,20 @@ async def spam_resistance():
     while not bot.is_closed():
         past_ten_seconds = datetime.datetime.utcnow()-datetime.timedelta(seconds=10)
         for guild in bot.guilds:
-            else:
-                for channel in guild.channels:
-                    if isinstance(channel, discord.TextChannel):
+            for channel in guild.channels:
+                if isinstance(channel, discord.TextChannel):
+                    try:
+                        async for message in channel.history(after=past_ten_seconds):
+                            if not message.author.bot:
+                                if not message.author.id == 422181415598161921:
+                                    messages.append(message.author.id)
                         try:
-                            async for message in channel.history(after=past_ten_seconds):
-                                if not message.author.bot:
-                                    if not message.author.id == 422181415598161921:
-                                        messages.append(message.author.id)
-                            try:
-                                bot.messages[channel]=messages
-                            except KeyError:
-                                bot.messages.update({channel:messages})
-                            messages = []
-                        except:
-                            pass
+                            bot.messages[channel]=messages
+                        except KeyError:
+                            bot.messages.update({channel:messages})
+                        messages = []
+                    except:
+                        pass
         asyncio.sleep(1)
 
 async def webserver():
