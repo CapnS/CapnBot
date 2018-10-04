@@ -259,8 +259,12 @@ async def on_message(message):
                 pass 
             elif msg.author.id == message.author.id:
                 message_list.append(msg)
-        user_messages_sent = sum(1 for msg in bot.messages[message.channel] if msg == message.author.id)
-        user_message_content = sum(1 for msg in message_list if msg.content == message.content)
+        if not message.guild.name == "discord.py":
+            user_messages_sent = sum(1 for msg in bot.messages[message.channel] if msg == message.author.id)
+            user_message_content = sum(1 for msg in message_list if msg.content == message.content)
+        else:
+            user_messages_sent = 1
+            user_message_content = 1         
     except KeyError:
         user_messages_sent = 1
         user_message_content = 1
