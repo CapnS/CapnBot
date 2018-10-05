@@ -1,6 +1,6 @@
 
 
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/Django.svg) ![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg) ![Discord](https://img.shields.io/discord/451226137620906005.svg) 
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/Django.svg) ![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg) ![Discord](https://img.shields.io/discord/451226137620906005.svg?label=discord&colorB=062556) 
 
 
 # CapnBot
