@@ -6,7 +6,7 @@ import inspect
 import os
 import dweepy 
 import git 
-from paginator import HelpPaginator, CannotPaginate
+from .paginator import HelpPaginator, CannotPaginate
 
 class BotInfo():
     def __init__(self,bot):
