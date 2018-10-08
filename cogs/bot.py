@@ -59,7 +59,10 @@ class BotInfo():
             all_guilds.append(guild)
         total_members = sum(1 for _ in self.bot.get_all_members())
         capn = await self.bot.get_user_info(422181415598161921)
-        repo = git.Repo(r"C:/Users/zacha/Downloads/CapnBot/CapnBot")
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        dir_path = os.path.dirname(dir_path)
+        repo = git.Repo(dir_path)
+        print(dir_path)
         commit = repo.head.commit.message    
         em = discord.Embed(title = "Bot Info", description = f"[Bot Invite](https://discordapp.com/oauth2/authorize?&client_id={self.bot.user.id}&scope=bot&permissions=8) | [Support Server](https://discord.gg/MJV4qsV) | [Source Code](https://github.com/CapnS/CapnBot)")
         em.color = discord.Color.gold()

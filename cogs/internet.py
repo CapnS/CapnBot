@@ -88,7 +88,7 @@ class Internet():
             else:
                 safe = "high"
         except AttributeError:
-            safe = "off"
+            safe = "high"
         results = self.google(str(search), api_key, cse_id, searchType = "image", num=1, safe = safe)
         for result in results:
             image = result["link"]
