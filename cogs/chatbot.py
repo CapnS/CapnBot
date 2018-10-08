@@ -5,7 +5,7 @@ from discord.ext import commands
 
 chatterbot = ChatBot("CapnBot")
 chatterbot.set_trainer(ChatterBotCorpusTrainer)
-chatterbot.train("chatterbot.corpus.english")
+
 
 class CapnChat():
     def __init__(self,bot):
