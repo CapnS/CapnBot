@@ -1,3 +1,8 @@
+
+
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/Django.svg) ![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg) ![Discord](https://img.shields.io/discord/451226137620906005.svg?label=discord&colorB=062556) 
+
+
 # CapnBot
 This bot is created using the rewrite version of discord.py (currently 1.0.0a). It does quite a bit imho and can really help enhance the discord experience if used correctly.
 
