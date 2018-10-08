@@ -61,7 +61,10 @@ class BotInfo():
         capn = await self.bot.get_user_info(422181415598161921)
         dir_path = os.path.dirname(os.path.realpath(__file__))
         dir_path = os.path.dirname(dir_path)
-        repo = git.Repo(dir_path)
+        try:
+            repo = git.Repo(dir_path)
+        except:
+            repo = git.Repo(r"/home/zachary/CapnBot.git")
         print(dir_path)
         commit = repo.head.commit.message    
         em = discord.Embed(title = "Bot Info", description = f"[Bot Invite](https://discordapp.com/oauth2/authorize?&client_id={self.bot.user.id}&scope=bot&permissions=8) | [Support Server](https://discord.gg/MJV4qsV) | [Source Code](https://github.com/CapnS/CapnBot)")
