@@ -29,7 +29,7 @@ class Twitch():
             url = url.replace("{","")
             url = url.replace("}","")
             print(url)
-            auth = {"Client-ID": '6rjty0dujvzewd971rbycfchy3olxv'}
+            auth = {"Client-ID": twitch_id}
             async with aiohttp.ClientSession(headers=auth) as session:
                 async with session.get("https://api.twitch.tv/helix/games?id="+str(game_id)) as resp:
                     data = await resp.json()
