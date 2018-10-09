@@ -17,3 +17,4 @@ asyncurban
 gitpython
 tweepy
 aiogoogletrans
+git+https://github.com/MysterialPy/TwitchIO.git

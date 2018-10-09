@@ -223,6 +223,7 @@ async def on_ready():
     bot.load_extension('cogs.fortnite')
     bot.load_extension('cogs.bot')
     bot.load_extension('cogs.twitter')
+    bot.load_extension('cogs.twitch')
     credentials = {"user": "zachary", "password": "capn", "database": "capnbot", "host": "127.0.0.1"}
     bot.db = await asyncpg.create_pool(**credentials)
     data = await bot.db.fetchrow("SELECT user_id FROM users WHERE blacklisted=true;")
@@ -280,7 +281,7 @@ async def on_message(message):
         try:
             role = discord.utils.get(message.guild.roles,name="Muted")
             await message.author.add_roles(role)
-            return await message.channel.send(message.author.mention + " has been muted for saying the same thing 5 times in the past two minutes.")
+            return await message.channel.send(message.author.mention + " has been muted for saying the same thing 10 times in the past two minutes.")
         except:
             return await message.channel.send("Please stop saying the same things over and over " + message.author.mention)
     if message.author.id in bot.blacklist:
