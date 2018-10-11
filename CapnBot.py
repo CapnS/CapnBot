@@ -67,7 +67,7 @@ except:
 @bot.group(invoke_without_command=True)
 @commands.guild_only()
 async def prefix(ctx, prefix):
-    pass
+    await ctx.send("Missing an argument(add, clear, or show).")
 
 
 @prefix.command(aliases=["set"])
