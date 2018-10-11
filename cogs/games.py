@@ -395,6 +395,5 @@ class Games():
                 if grids[x][y] == player and grids[x+1][y+1] == player and grids[x+2][y+2] == player and grids[x+3][y+3] == player:
                     return True
 
-
 def setup(bot):
     bot.add_cog(Games(bot))

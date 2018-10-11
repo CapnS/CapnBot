@@ -217,7 +217,7 @@ class Misc():
                 await message.pin()
 
     @commands.command()
-    async def text(self, ctx, message):
+    async def text(self, ctx,*, message):
         'Texts Me'
         if not ctx.author.id == 422181415598161921:
             return
