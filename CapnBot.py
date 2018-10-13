@@ -70,9 +70,9 @@ async def prefix(ctx, prefix):
     await ctx.send("Missing an argument(add, clear, or show).")
 
 
-@prefix.command(aliases=["set"])
+@prefix.command()
 @commands.guild_only()
-async def add(ctx,prefix):
+async def set(ctx,prefix):
     '''Sets a new prefix for the guild'''
     if not ((ctx.author.id == 422181415598161921) or (ctx.author.guild_permissions.administrator)):
         return await ctx.send("You don't have the permissions to use this command.")
