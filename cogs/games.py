@@ -395,5 +395,80 @@ class Games():
                 if grids[x][y] == player and grids[x+1][y+1] == player and grids[x+2][y+2] == player and grids[x+3][y+3] == player:
                     return True
 
+    @commands.command(aliases=["bj"])
+    async def blackjack(self,ctx):
+        dealer = []
+        user = []
+        for i in range(2):
+            dealer.append(random.randint(1,10))
+            user.append(random.randint(1,10))
+        green = discord.Color.green()
+        em = discord.Embed(title="Blackjack",description=ctx.author.name,color= green)
+        em.add_field(name="Dealer",value = str(dealer[0])+"?")
+        em.add_field(name=ctx.author.name,value=user)
+        message = await ctx.send(embed = em)
+        user_amount = 0
+        dealer_amount = 0
+        for x in user:
+            user_amount+=x
+        for x in dealer:
+            dealer_amount+=x
+        while user_amount < 22:
+            def check(message):
+                    return message.author == ctx.author and message.content in ("h","s")
+            try:
+                play = await self.bot.wait_for('message',check = check,timeout=60)
+            except:
+                return
+            play = play.clean_content
+            if play == "h":
+                card = random.randint(1,10)
+                user.append(card)
+                user_amount+=card
+                await message.delete()
+                green = discord.Color.green()
+                em = discord.Embed(title="Blackjack",description=ctx.author.name,color= green)
+                em.add_field(name="Dealer",value = str(dealer[0])+"?")
+                em.add_field(name=ctx.author.name,value=user)
+                message = await ctx.send(embed = em)
+            else:
+                break
+        if user_amount > 21:
+            await message.delete()
+            red = discord.Color.red()
+            em = discord.Embed(title="Blackjack",description="Bust, Dealer Wins",color=red)
+            em.add_field(name="Dealer",value = str(dealer[0])+"?")
+            em.add_field(name=ctx.author.name,value=user)
+            return await ctx.send(embed = em)
+        while dealer_amount < 17:
+            card = random.randint(1,10)
+            dealer.append(card)
+            dealer_amount+=card
+            if dealer_amount > 21:
+                await message.delete()
+                blue = discord.Color.blue()
+                em = discord.Embed(title="Blackjack",description="Dealer Busted, You Win",color=blue)
+                em.add_field(name="Dealer",value = dealer)
+                em.add_field(name=ctx.author.name,value=user)
+                return await ctx.send(embed = em)
+            green = discord.Color.green()
+            em = discord.Embed(title="Blackjack",description=ctx.author.name,color= green)
+            em.add_field(name="Dealer",value = dealer)
+            em.add_field(name=ctx.author.name,value=user)
+            message = await ctx.send(embed = em)
+        if dealer_amount > user_amount:
+            await message.delete() 
+            red = discord.Color.red()       
+            em = discord.Embed(title="Blackjack",description="Dealer Wins",color=red)
+        else:
+            blue = discord.Color.blue()
+            em = discord.Embed(title="Blackjack",description="You win!",color=blue)
+        em.add_field(name="Dealer",value = dealer)
+        em.add_field(name=ctx.author.name,value=user)
+        return await ctx.send(embed = em)
+
+            
+            
+
 def setup(bot):
     bot.add_cog(Games(bot))
