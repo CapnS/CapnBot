@@ -94,13 +94,29 @@ class Regular():
         'Deletes Messages'
         if ctx.author.guild_permissions.administrator:
             try:
-                async for message in ctx.channel.history(limit=int(amount)+1):
-                    await message.delete()
+                await ctx.channel.purge(limit=amount+1)
                 await ctx.send(amount + ' Messages Deleted')
             except discord.errors.ClientException:
                 await ctx.send('Can only delete in range 2, 100.')
         else:
-            await ctx.send('Permission Denied')
+            return
+
+    @commands.command()
+    async def purge(self,ctx,user:discord.Member, num : int):
+        if ctx.author.guild_permissions.administrator:
+            def check(message):
+                return message.author = user
+            await ctx.channel.purge(limit = num, check=check)
+            
+    @commands.command()
+    async def remove(self,ctx,num:int):
+        if not ctx.author.id == 422181415598161921 or ctx.author.guild_permissions.administrator:
+            return
+        else:
+            def check(message):
+                return message.author == self.bot.user
+            await ctx.channel.purge(limit = num+1, check=check)
+            
 
     @commands.command(aliases=['info'])
     async def userinfo(self, ctx, *, user: discord.Member=None):
