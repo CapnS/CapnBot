@@ -396,7 +396,13 @@ class Games():
                     return True
 
     @commands.command(aliases=["bj"])
-    async def blackjack(self,ctx):
+    async def blackjack(self,ctx, bet:int):
+        data = await self.bot.db.fetchrow("SELECT * FROM users WHERE user_id = $1;",ctx.author.id)
+        if data == None:
+            return await ctx.send(f"Use {ctx.prefix}start to use this command")
+        users_money = data["balance"]
+        if users_money < bet:
+            return await ctx.send("You don't have enough money to make that bet")        
         dealer = []
         user = []
         for i in range(2):
@@ -423,9 +429,16 @@ class Games():
             user_amount+=x
         for x in dealer:
             dealer_amount+=x
+        if user_amount == 21 and dealer_amount != 21:
+            await message.delete()
+            blue = discord.Color.blue()
+            em = discord.Embed(title="Blackjack",description="BLACKJACK, You Win",color=blue)
+            em.add_field(name="Dealer",value = dealer)
+            em.add_field(name=ctx.author.name,value=user)
+            return await ctx.send(embed = em)  
         while user_amount < 22:
             def check(message):
-                    return message.author == ctx.author and message.content in ("h","s")
+                return message.author == ctx.author and message.content in ("h","s")
             try:
                 play = await self.bot.wait_for('message',check = check,timeout=60)
             except:
@@ -456,6 +469,8 @@ class Games():
                         em = discord.Embed(title="Blackjack",description="Bust, Dealer Wins",color=red)
                         em.add_field(name="Dealer",value = str(dealer))
                         em.add_field(name=ctx.author.name,value=user)
+                        current = users_money - bet
+                        await self.bot.db.execute("UPDATE users SET balance=$1 WHERE user_id=$2",current,ctx.author.id)
                         return await ctx.send(embed = em)
                 await message.delete()
                 green = discord.Color.green()
@@ -465,6 +480,15 @@ class Games():
                 message = await ctx.send(embed = em)
             else:
                 break
+        if dealer_amount == 21:
+            await message.delete()
+            red = discord.Color.red()
+            em = discord.Embed(title="Blackjack",description="Dealer has blackjack, You Lose",color=red)
+            em.add_field(name="Dealer",value = dealer)
+            em.add_field(name=ctx.author.name,value=user)
+            current = users_money - bet
+            await self.bot.db.execute("UPDATE users SET balance=$1 WHERE user_id=$2",current,ctx.author.id)
+            return await ctx.send(embed = em)  
         while dealer_amount < 17:
             card = random.randint(1,13)
             if card >= 10:
@@ -490,6 +514,8 @@ class Games():
                     em = discord.Embed(title="Blackjack",description="Dealer Busted, You Win",color=blue)
                     em.add_field(name="Dealer",value = dealer)
                     em.add_field(name=ctx.author.name,value=user)
+                    current = users_money + bet
+                    await self.bot.db.execute("UPDATE users SET balance=$1 WHERE user_id=$2",current,ctx.author.id)
                     return await ctx.send(embed = em)
             green = discord.Color.green()
             em = discord.Embed(title="Blackjack",description=ctx.author.name,color= green)
@@ -500,6 +526,8 @@ class Games():
             await message.delete() 
             red = discord.Color.red()       
             em = discord.Embed(title="Blackjack",description="Dealer Wins",color=red)
+            current = users_money - bet
+            await self.bot.db.execute("UPDATE users SET balance=$1 WHERE user_id=$2",current,ctx.author.id)
         elif dealer_amount == user_amount:
             await message.delete()
             gold = discord.Color.gold()
@@ -508,9 +536,12 @@ class Games():
             await message.delete()
             blue = discord.Color.blue()
             em = discord.Embed(title="Blackjack",description="You win!",color=blue)
+            current = users_money + bet
+            await self.bot.db.execute("UPDATE users SET balance=$1 WHERE user_id=$2",current,ctx.author.id)
         em.add_field(name="Dealer",value = dealer)
         em.add_field(name=ctx.author.name,value=user)
-        return await ctx.send(embed = em)
+        await ctx.send(embed = em)
+        await ctx.send("Your new balance is $"+str(current)) 
 
             
             
