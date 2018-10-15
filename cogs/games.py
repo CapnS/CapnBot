@@ -400,11 +400,21 @@ class Games():
         dealer = []
         user = []
         for i in range(2):
-            dealer.append(random.randint(1,10))
-            user.append(random.randint(1,10))
+            card = random.randint(1,13)
+            if card >= 10:
+                card = 10
+            if card == 1:
+                card = 11
+            dealer.append(card)
+            card = random.randint(1,13)
+            if card >= 10:
+                card = 10
+            if card == 1:
+                card == 11
+            user.append(card)
         green = discord.Color.green()
         em = discord.Embed(title="Blackjack",description=ctx.author.name,color= green)
-        em.add_field(name="Dealer",value = str(dealer[0])+"?")
+        em.add_field(name="Dealer",value = "["+str(dealer[0])+",?]")
         em.add_field(name=ctx.author.name,value=user)
         message = await ctx.send(embed = em)
         user_amount = 0
@@ -422,35 +432,64 @@ class Games():
                 return
             play = play.clean_content
             if play == "h":
-                card = random.randint(1,10)
+                card = random.randint(1,13)
+                if card >= 10:
+                    card = 10
+                if card == 1:
+                    if user_amount + 11 <= 21:
+                        card = 11
                 user.append(card)
                 user_amount+=card
+                if user_amount > 21:
+                    if 11 in user:
+                        i = 0
+                        for x in user:
+                            if x == 11:
+                                user.pop(i)
+                                user_amount-=10
+                                break
+                            i+=1
+                    if user_amount > 21:
+                        await message.delete()
+                        red = discord.Color.red()
+                        em = discord.Embed(title="Blackjack",description="Bust, Dealer Wins",color=red)
+                        em.add_field(name="Dealer",value = str(dealer))
+                        em.add_field(name=ctx.author.name,value=user)
+                        return await ctx.send(embed = em)
                 await message.delete()
                 green = discord.Color.green()
                 em = discord.Embed(title="Blackjack",description=ctx.author.name,color= green)
-                em.add_field(name="Dealer",value = str(dealer[0])+"?")
+                em.add_field(name="Dealer",value = "["+str(dealer[0])+",?]")
                 em.add_field(name=ctx.author.name,value=user)
                 message = await ctx.send(embed = em)
             else:
                 break
-        if user_amount > 21:
-            await message.delete()
-            red = discord.Color.red()
-            em = discord.Embed(title="Blackjack",description="Bust, Dealer Wins",color=red)
-            em.add_field(name="Dealer",value = str(dealer[0])+"?")
-            em.add_field(name=ctx.author.name,value=user)
-            return await ctx.send(embed = em)
         while dealer_amount < 17:
-            card = random.randint(1,10)
+            card = random.randint(1,13)
+            if card >= 10:
+                card = 10
+            if card == 1:
+                if dealer_amount + 11 <= 21:
+                    card == 11
             dealer.append(card)
             dealer_amount+=card
             if dealer_amount > 21:
-                await message.delete()
-                blue = discord.Color.blue()
-                em = discord.Embed(title="Blackjack",description="Dealer Busted, You Win",color=blue)
-                em.add_field(name="Dealer",value = dealer)
-                em.add_field(name=ctx.author.name,value=user)
-                return await ctx.send(embed = em)
+                i = 0
+                if 11 in dealer:
+                    for x in dealer:
+                        if x == 11:
+                            dealer.pop(i)
+                            dealer.append(1)
+                            dealer_amount-=10
+                            break
+                        i+=1
+                if dealer_amount > 21:
+                    await message.delete()
+                    blue = discord.Color.blue()
+                    em = discord.Embed(title="Blackjack",description="Dealer Busted, You Win",color=blue)
+                    em.add_field(name="Dealer",value = dealer)
+                    em.add_field(name=ctx.author.name,value=user)
+                    return await ctx.send(embed = em)
             green = discord.Color.green()
             em = discord.Embed(title="Blackjack",description=ctx.author.name,color= green)
             em.add_field(name="Dealer",value = dealer)
