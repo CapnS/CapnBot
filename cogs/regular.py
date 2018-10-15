@@ -90,7 +90,7 @@ class Regular():
 
               
     @commands.command()
-    async def delete(self, ctx, amount):
+    async def delete(self, ctx, amount:int):
         'Deletes Messages'
         if ctx.author.guild_permissions.administrator:
             try:
