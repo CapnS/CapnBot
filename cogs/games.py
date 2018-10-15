@@ -446,6 +446,7 @@ class Games():
                         for x in user:
                             if x == 11:
                                 user.pop(i)
+                                user.append(1)
                                 user_amount-=10
                                 break
                             i+=1
