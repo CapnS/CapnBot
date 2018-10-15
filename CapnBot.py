@@ -240,7 +240,6 @@ async def on_ready():
         if command.qualified_name not in commands:
             await bot.db.execute("INSERT INTO commands VALUES($1,0);",command.qualified_name)
     await bot.change_presence(activity=discord.Game(name="c!help")) 
-    print('')
     print('------')
     print('Logged in as')
     print(bot.user.name)
