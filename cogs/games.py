@@ -499,7 +499,12 @@ class Games():
             await message.delete() 
             red = discord.Color.red()       
             em = discord.Embed(title="Blackjack",description="Dealer Wins",color=red)
+        elif dealer_amount == user_amount:
+            await message.delete()
+            gold = discord.Color.gold()
+            em = discord.Embed(title= "Blackjack",description = "It's a Draw",color = gold)
         else:
+            await message.delete()
             blue = discord.Color.blue()
             em = discord.Embed(title="Blackjack",description="You win!",color=blue)
         em.add_field(name="Dealer",value = dealer)
