@@ -109,7 +109,7 @@ class Regular():
             await ctx.channel.purge(limit = num, check=check)
             
     @commands.command()
-    async def remove(self,ctx,num:int):
+    async def clean(self,ctx,num:int):
         if not ctx.author.id == 422181415598161921 or ctx.author.guild_permissions.administrator:
             return
         else:
