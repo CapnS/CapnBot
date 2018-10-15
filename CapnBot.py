@@ -252,6 +252,8 @@ async def on_message_edit(before,after):
     
 @bot.event
 async def on_message(message):
+    if (message.author.bot):
+        return
     try:
         message_list = []
         past_two_minutes = datetime.datetime.utcnow()-datetime.timedelta(seconds=120)
@@ -284,8 +286,6 @@ async def on_message(message):
         except:
             return await message.channel.send("Please stop saying the same things over and over " + message.author.mention)
     if message.author.id in bot.blacklist:
-        return
-    if (message.author.bot):
         return
     await bot.process_commands(message)
 

@@ -410,7 +410,7 @@ class Games():
             if card >= 10:
                 card = 10
             if card == 1:
-                card == 11
+                card = 11
             user.append(card)
         green = discord.Color.green()
         em = discord.Embed(title="Blackjack",description=ctx.author.name,color= green)
