@@ -105,7 +105,7 @@ class Regular():
     async def purge(self,ctx,user:discord.Member, num : int):
         if ctx.author.guild_permissions.administrator:
             def check(message):
-                return message.author = user
+                return message.author == user
             await ctx.channel.purge(limit = num, check=check)
             
     @commands.command()
