@@ -184,17 +184,22 @@ class Internet():
             em.add_field(name="Lyrics:",value = lyrics)
             em.set_footer(text="Requested by "+ctx.author.name, icon_url= ctx.author.avatar_url)
             return await ctx.send(embed=em)
+        lyrics = lyrics.split("\n")
         i = 0
         x=1
+        lyric = lyrics[i*15:x*15]
+        msg = ""
+        for line in lyric:
+            msg = msg + line + "\n"
         blue = discord.Color.blue()
         em = discord.Embed(title="Song Lyrics",description=f"{song} by {artist}",color = blue)
-        em.add_field(name = "Lyrics",value = lyrics[0:500])
+        em.add_field(name = "Lyrics",value = msg)
         em.set_footer(text="Requested by "+ctx.author.name, icon_url= ctx.author.avatar_url)
         message = await ctx.send(embed=em)
         await message.add_reaction("\U000025c0")
         await message.add_reaction("\U000025b6")
         await message.add_reaction("\U0001f6d1")
-        times,remainder = divmod(len(lyrics),500)
+        times,remainder = divmod(len(lyrics),15)
         pages = times+1
         while True:
             def check(reaction, user):
@@ -221,8 +226,12 @@ class Internet():
                     x+=1
             if reaction.emoji == '\U0001f6d1':
                 return await message.delete()
+            lyric = lyrics[i*15:x*15]
+            msg = ""
+            for line in lyric:
+                msg = msg + line + "\n"
             em = discord.Embed(title="Song Lyrics",description=f"{song} by {artist}",color = blue)
-            em.add_field(name = "Lyrics",value = lyrics[i*500:x*500])
+            em.add_field(name = "Lyrics",value = msg )
             em.set_footer(text="Requested by "+ctx.author.name, icon_url= ctx.author.avatar_url)
             await message.edit(embed=em)
             
