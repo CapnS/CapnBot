@@ -10,6 +10,7 @@ from forex_python.bitcoin import BtcConverter
 import sys
 import asyncurban
 import aiogoogletrans
+import asyncio
 
 c = CurrencyRates()
 b = BtcConverter()
@@ -165,6 +166,70 @@ class Internet():
         em = discord.Embed(title = f"{translated} -> {language}",description=translation,color = green)
         em.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.avatar_url)
         await ctx.send(embed = em)
+
+    @commands.command()
+    async def lyrics(self,ctx,artist,*,song):
+        art = artist.replace(" ", "%20")
+        sng = song.replace(" ", "%20")
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"https://lyric-api.herokuapp.com/api/find/{art}/{sng}") as resp:
+                response = await resp.json()
+                if response["err"] == "not found":
+                    return await ctx.send(f"The song {song} by {artist} was not found.")
+                else:
+                    lyrics = response["lyric"]
+        if len(lyrics) < 500:
+            blue = discord.Color.blue()
+            em = discord.Embed(title="Song Lyrics",description=f"{song} by {artist}",color = blue)
+            em.add_field(name="Lyrics:",value = lyrics)
+            em.set_footer(text="Requested by "+ctx.author.name, icon_url= ctx.author.avatar_url)
+            return await ctx.send(embed=em)
+        i = 0
+        x=1
+        blue = discord.Color.blue()
+        em = discord.Embed(title="Song Lyrics",description=f"{song} by {artist}",color = blue)
+        em.add_field(name = "Lyrics",value = lyrics[0:500])
+        em.set_footer(text="Requested by "+ctx.author.name, icon_url= ctx.author.avatar_url)
+        message = await ctx.send(embed=em)
+        await message.add_reaction("\U000025c0")
+        await message.add_reaction("\U000025b6")
+        await message.add_reaction("\U0001f6d1")
+        times,remainder = divmod(len(lyrics),500)
+        pages = times+1
+        while True:
+            def check(reaction, user):
+                return user == ctx.author and reaction.emoji in ('\U000025c0', '\U000025b6','\U0001f6d1')
+            try:
+                reaction,user = await self.bot.wait_for("reaction_add",check=check,timeout=60)
+            except asyncio.TimeoutError:
+                break
+            try:
+                await message.remove_reaction(reaction.emoji,user)
+            except:
+                pass
+            if reaction.emoji == '\U000025c0':
+                if i == 0:
+                    pass
+                else:
+                    i-=1
+                    x-=1
+            if reaction.emoji == '\U000025b6':
+                if x == pages:
+                    pass
+                else:
+                    i+=1
+                    x+=1
+            if reaction.emoji == '\U0001f6d1':
+                return await message.delete()
+            em = discord.Embed(title="Song Lyrics",description=f"{song} by {artist}",color = blue)
+            em.add_field(name = "Lyrics",value = lyrics[i*500:x*500])
+            em.set_footer(text="Requested by "+ctx.author.name, icon_url= ctx.author.avatar_url)
+            await message.edit(embed=em)
+            
+
+
+                
+                
 
 def setup(bot):
     bot.add_cog(Internet(bot))

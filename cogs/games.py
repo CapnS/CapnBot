@@ -532,6 +532,7 @@ class Games():
             await message.delete()
             gold = discord.Color.gold()
             em = discord.Embed(title= "Blackjack",description = "It's a Draw",color = gold)
+            current = users_money
         else:
             await message.delete()
             blue = discord.Color.blue()
