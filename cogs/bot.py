@@ -6,7 +6,7 @@ import inspect
 import os
 import dweepy 
 import git 
-from .paginator import HelpPaginator, CannotPaginate
+from .paginator import Pages,HelpPaginator, CannotPaginate
 
 class BotInfo():
     def __init__(self,bot):
@@ -113,17 +113,14 @@ class BotInfo():
                 return await ctx.send("Not a valid command")
             uses = data["uses"]
             return await ctx.send(f"{command} has {uses} uses")
-        data = await self.bot.db.fetch("SELECT * FROM commands ORDER BY uses DESC LIMIT 10;")
-        leaderboard = ""
-        i=1
+        data = await self.bot.db.fetch("SELECT * FROM commands ORDER BY uses DESC;") 
+        entries = []    
         for row in data:
             command, uses = row["command_name"], row["uses"]
-            leaderboard = f"{leaderboard} {i} - {command} : {uses} uses \n"
-            i+=1
-        color= discord.Color.blurple()
-        em = discord.Embed(title="Command Usage", description=leaderboard)
-        em.color=(color)
-        await ctx.send(embed=em)
+            entry = f"{command} : {uses} uses"
+            entries.append(entry)
+        p = Pages(ctx,entries=entries)
+        await p.paginate()
 
     @commands.command(name='help')
     async def _help(self, ctx, *, command: str = None):

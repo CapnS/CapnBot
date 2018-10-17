@@ -6,6 +6,7 @@ from discord.ext.commands.cooldowns import BucketType
 import json
 import aiohttp
 import asyncpg
+from .paginator import Pages, CannotPaginate
 
 
 class Games():
@@ -545,7 +546,17 @@ class Games():
         await ctx.send("Your new balance is $"+str(current)) 
 
             
-            
+    @commands.command(aliases=["lb","top"])
+    async def leaderboard(self,ctx):
+        data = await self.bot.db.fetch("SELECT user_id,balance FROM users ORDER BY balance DESC;")
+        balances = []
+        for x in data:
+            user = await self.bot.get_user_info(x["user_id"])
+            balance = x["balance"]
+            balances.append(f"{user.name} - ${balance}")
+        p = Pages(ctx,entries=balances)
+        await p.paginate()
+
 
 def setup(bot):
     bot.add_cog(Games(bot))
