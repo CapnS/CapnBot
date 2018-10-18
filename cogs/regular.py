@@ -9,7 +9,7 @@ import dweepy
 import asyncio
 import dbl
 import traceback
-
+import aiohttp
 
 
 class Regular():
@@ -251,8 +251,6 @@ class Regular():
     async def annoy(self,ctx):
         '''Sends a link to my webserver'''
         await ctx.send("https://annoycapn.herokuapp.com/index/")
-
-
 
 
 def setup(bot):

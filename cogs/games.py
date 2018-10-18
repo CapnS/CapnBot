@@ -15,13 +15,6 @@ class Games():
         self.bot = bot
         self.Won = False
         
-    @commands.command()
-    async def trbmb(self,ctx):
-        async with aiohttp.ClientSession() as session:
-            async with session.get("https://api.chew.pro/trbmb") as resp:
-                text = await resp.text()
-                text = text.strip('"[]')
-                await ctx.send(text)
 
     @commands.command()
     async def start(self,ctx):
@@ -46,46 +39,6 @@ class Games():
             await ctx.send("User already in system")
 
 
-    @commands.command()
-    async def eightball(self, ctx):
-        '-> Answers a question'
-        answer = random.randint(1, 12)
-        if answer == 1:
-            line = 'Yes'
-            await ctx.send(line)
-        if answer == 2:
-            line = 'No'
-            await ctx.send(line)
-        if answer == 3:
-            line = 'Maybe'
-            await ctx.send(line)
-        if answer == 4:
-            line = 'Possibly'
-            await ctx.send(line)
-        if answer == 5:
-            line = 'Probably'
-            await ctx.send(line)
-        if answer == 6:
-            line = 'Definitely'
-            await ctx.send(line)
-        if answer == 7:
-            line = "I'm not sure, ask again"
-            await ctx.send(line)
-        if answer == 8:
-            line = 'Probably Not'
-            await ctx.send(line)
-        if answer == 9:
-            line = 'It is Likely'
-            await ctx.send(line)
-        if answer == 10:
-            line = 'Definitely Not'
-            await ctx.send(line)
-        if answer == 11:
-            line = 'It could work that way'
-            await ctx.send(line)
-        if answer == 12:
-            line = 'Hopefully'
-            await ctx.send(line)
 
     @commands.command()
     async def coinflip(self, ctx, side):
@@ -374,9 +327,9 @@ class Games():
         return False
 
     def vertcheck_won(self,grids,player,n):
-        amount = 0
         for i in range(n):
             for grid in grids:
+                amount=0
                 if grid[i] == player:
                     amount+=1
                     if amount >= 4:

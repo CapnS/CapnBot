@@ -235,7 +235,13 @@ class Internet():
             em.set_footer(text="Requested by "+ctx.author.name, icon_url= ctx.author.avatar_url)
             await message.edit(embed=em)
             
-
+    @commands.command()
+    async def trbmb(self,ctx):
+        async with aiohttp.ClientSession() as session:
+            async with session.get("https://api.chew.pro/trbmb") as resp:
+                text = await resp.text()
+                text = text.strip('"[]')
+                await ctx.send(text)
 
                 
                 

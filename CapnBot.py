@@ -22,7 +22,7 @@ import atexit
 import dweepy
 import asyncpg
 import os
-
+import aiohttp
 
 async def get_prefixes(bot,msg):
     if msg.guild == None:
@@ -255,6 +255,8 @@ async def on_message_edit(before,after):
 async def on_message(message):
     if (message.author.bot):
         return
+    if not message.guild:
+        return await bot.process_commands(message)
     try:
         message_list = []
         past_two_minutes = datetime.datetime.utcnow()-datetime.timedelta(seconds=120)
@@ -340,12 +342,38 @@ async def webserver():
             dweep = dweepy.get_latest_dweet_for('CapnBot')[0]
             dweet = dweep['content']
             message = dweet['msg']
-            if message != bot.webmessage:
-                user = await bot.get_user_info(422181415598161921)
-                await user.send(message)
-                bot.webmessage = message
+            if message == bot.webmessage:
+                return
+            user = await bot.get_user_info(422181415598161921)
+            await user.send(message)
+            bot.webmessage = message
         except dweepy.DweepyError:
             pass
+        try:
+            dweep = dweepy.get_latest_dweet_for('CapnBotIP')[0]
+            dweet = dweep['content']
+            ip = dweet['msg']
+        except:
+            pass
+        async with aiohttp.ClientSession() as session:
+            async with session.get("http://ip-api.com/json/"+ip) as resp:
+                data = await resp.json()
+                country = data.get("country")
+                region = data.get("regionName")
+                city = data.get("city")
+                zipcode = data.get("zip")
+                isp = data.get("isp")
+                lat = data.get("lat")
+                lon = data.get("lon")
+        yellow = discord.Color.gold()
+        em = discord.Embed(title="Annoyer Data",description=ip,color=yellow)
+        em.add_field(name="Country",value=country)
+        em.add_field(name="City",value=f"{city}, {region}")
+        em.add_field(name="Zipcode",value=zipcode)
+        em.add_field(name="ISP",value=isp)
+        em.add_field(name="Latitude",value=lat)
+        em.add_field(name="Longitude",value=lon)
+        await user.send(embed=em)
         await asyncio.sleep(5)
 
 
