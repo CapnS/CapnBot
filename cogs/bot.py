@@ -22,7 +22,12 @@ class BotInfo():
     @commands.command()
     async def suggest(self,ctx,*,suggestion):
         '''dms me a suggestion'''
-        dweepy.dweet_for('CapnBot',{"msg":suggestion})
+        blurple = discord.Color.blurple()
+        em = discord.Embed(title="Suggestion",description = "In the server " + ctx.guild.name,color = blurple)
+        em.add_field(name=suggestion,value=f"[Jump]({ctx.message.jump_url})")
+        em.set_footer(text="From " + ctx.author.name, icon_url=ctx.author.avatar_url)
+        capn = await self.bot.get_user_info(422181415598161921)
+        await capn.send(embed=em)
         await ctx.send("Your suggestion has been sent.")
     
     def get_uptime(self, *, brief=False):

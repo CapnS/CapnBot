@@ -248,7 +248,7 @@ async def on_ready():
 
 @bot.event
 async def on_message_edit(before,after):
-    if not message.author.id in bot.blacklist:
+    if not after.author.id in bot.blacklist:
         await bot.process_commands(after)
     
 @bot.event

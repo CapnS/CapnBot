@@ -46,7 +46,7 @@ class Regular():
         for member in self.bot.blacklist:
             if member == user.id:
                 self.bot.blacklist.pop(i)
-                await ctx.send("Un-Blacklisted"+user.name)
+                await ctx.send("Un-Blacklisted "+user.name)
                 await self.bot.db.execute("UPDATE users SET blacklisted=false WHERE user_id=$1",user.id)
                 found=True
             i+=1
