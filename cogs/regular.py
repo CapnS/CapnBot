@@ -63,8 +63,8 @@ class Regular():
         if not data:
             now = int((int(time.time())-28800))
             await self.bot.db.execute("INSERT INTO users VALUES ($1, 100, $2, 10, False)",user.id, now)
-        elif data["blacklisted"] == "true":
-            await ctx.send("User Already Blacklisted")
+        elif data["blacklisted"] == True:
+            return await ctx.send("User Already Blacklisted")
         em = discord.Embed(title = f"Blacklisted {user.name}")
         em.set_thumbnail(url=user.avatar_url)
         em.color = discord.Color.red()
