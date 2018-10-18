@@ -59,19 +59,14 @@ class Regular():
         '''blacklists a user'''
         if not ctx.author.id == 422181415598161921:
             return
-        for key in self.bot.blacklist:
-            if user.id == key:
-                return await ctx.send("User already blacklisted.")
-        if reason:
-            em = discord.Embed(title = f"Blacklisted {user.name}")
-            em.set_thumbnail(url=user.avatar_url)
-            em.color = discord.Color.red()
-            await ctx.send(embed=em)
-        else:
-            em = discord.Embed(title = f"Blacklisted {user.name}")
-            em.color = discord.Color.red()
-            em.set_thumbnail(url=user.avatar_url)
-            await ctx.send(embed=em)
+        data = await self.bot.db.fetchrow("SELECT * FROM users WHERE user_id=$1",user.id)
+        if not data:
+            now = int((int(time.time())-28800))
+            await self.bot.db.execute("INSERT INTO users VALUES ($1, 100, $2, 10, False)",user.id, now)
+        em = discord.Embed(title = f"Blacklisted {user.name}")
+        em.set_thumbnail(url=user.avatar_url)
+        em.color = discord.Color.red()
+        await ctx.send(embed=em)
         self.bot.blacklist.append(user.id)
         await self.bot.db.execute("UPDATE users SET blacklisted=true WHERE user_id=$1",user.id)
 
