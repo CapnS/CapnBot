@@ -10,7 +10,7 @@ import textwrap
 import traceback
 from contextlib import redirect_stdout
 import time
-
+import aiohttp
 
 class Plural:
     def __init__(self, **attr):
@@ -304,5 +304,22 @@ class Misc():
         em.add_field(name='All Donors', value=msg)
         await ctx.send(content=None, embed=em)
 
+    @commands.command()
+    async def chucknorris(self,ctx):
+        async with aiohttp.ClientSession() as session:
+            async with session.get("http://api.icndb.com/jokes/random") as resp:
+                data = await resp.json()
+                value = data.get("value")
+                joke = value.get("joke")
+                await ctx.send(joke)
+
+    @commands.command()
+    async def joke(self,ctx):
+        async with aiohttp.ClientSession() as session:
+            headers ={"Accept":"application/json"}
+            async with session.get("https://icanhazdadjoke.com/",headers=headers) as resp:
+                data = await resp.json()
+                joke = data.get("joke")
+                await ctx.send(joke)
 def setup(bot):
     bot.add_cog(Misc(bot))
