@@ -425,11 +425,16 @@ class Music:
         """Stop the currently playing song and destroy the player.
         """
         vc = ctx.voice_client
-
+        voter = ctx.author
         if not vc or not vc.is_connected():
             return await ctx.send('I am not currently playing anything!', delete_after=20)
+        for role in voter.roles:
+            if role.name == "DJ":
+                await ctx.send("DJ asked to stop the party, Lame!")
+                await self.cleanup(ctx.guild)
+                return
+        await ctx.send("You must have the DJ Role to stop the Party!")
         
-        await self.cleanup(ctx.guild)
 
 
 def setup(bot):
