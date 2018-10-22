@@ -65,6 +65,14 @@ class BotInfo():
         total_members = sum(1 for _ in self.bot.get_all_members())
         capn = await self.bot.get_user_info(422181415598161921)
         dir_path = os.path.dirname(os.path.realpath(__file__))
+        length=0
+        for f in os.listdir(dir_path):
+            if not f.endswith(".py"):
+                continue
+            else:
+                with open(dir_path+"\\"+f , 'r', encoding="utf8") as b:
+                    lines = b.readlines()
+                    length+=len(lines)
         dir_path = os.path.dirname(dir_path)
         try:
             repo = git.Repo(dir_path)
@@ -74,7 +82,6 @@ class BotInfo():
         commit = repo.head.commit.message    
         em = discord.Embed(title = "Bot Info", description = f"[Bot Invite](https://discordapp.com/oauth2/authorize?&client_id={self.bot.user.id}&scope=bot&permissions=8) | [Support Server](https://discord.gg/MJV4qsV) | [Source Code](https://github.com/CapnS/CapnBot)")
         em.color = discord.Color.gold()
-        em.add_field(name='Bot Name', value=str(me.display_name))
         em.add_field(name='Guilds', value=str(len(all_guilds)))
         em.add_field(name = "Users", value = str(total_members))
         em.add_field(name='Commands Run', value=str(self.bot.counter))
@@ -82,6 +89,7 @@ class BotInfo():
         em.add_field(name='Uptime', value=uptime)
         em.add_field(name = "Prefixes", value = f"``{prefix}``")
         em.add_field(name="Coded By", value = capn.mention)
+        em.add_field(name="Lines of Code",value = length)
         em.add_field(name="Latest Commit",value = f"```css\n{commit}\n```")
         em.set_footer(text='Requested by '+ctx.author.name, icon_url=ctx.author.avatar_url)
         em.set_thumbnail(url=self.bot.user.avatar_url)
