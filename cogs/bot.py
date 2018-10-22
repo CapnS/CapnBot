@@ -70,7 +70,7 @@ class BotInfo():
             if not f.endswith(".py"):
                 continue
             else:
-                with open(dir_path+"\\"+f , 'r', encoding="utf8") as b:
+                with open(dir_path+"/"+f , 'r', encoding="utf8") as b:
                     lines = b.readlines()
                     length+=len(lines)
         dir_path = os.path.dirname(dir_path)
