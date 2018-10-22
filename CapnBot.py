@@ -208,22 +208,11 @@ async def _get_owner():
 @asyncio.coroutine
 async def on_ready():
     await _get_owner()
-    bot.load_extension('cogs.fun')
-    bot.load_extension('cogs.duel')
-    bot.load_extension('cogs.Roles')
-    bot.load_extension('cogs.misc')
-    bot.load_extension('cogs.regular')
-    bot.load_extension('cogs.games')
-    bot.load_extension('cogs.internet')
-    bot.load_extension('cogs.Working Music')
-    bot.load_extension('cogs.Error Handling')
-    bot.load_extension('cogs.calculation')
+    extensions = ["fun","duel","Roles","misc","regular","games","internet","Working Music", \
+    "Error Handling","calculation","chatbot","fortnite", "bot", "twitter", "twitch", "tags"]
+    for extension in extensions:
+        bot.load_extension("cogs."+extension)
     bot.load_extension('jishaku')
-    bot.load_extension('cogs.chatbot')
-    bot.load_extension('cogs.fortnite')
-    bot.load_extension('cogs.bot')
-    bot.load_extension('cogs.twitter')
-    bot.load_extension('cogs.twitch')
     credentials = {"user": "zachary", "password": "capn", "database": "capnbot", "host": "127.0.0.1"}
     bot.db = await asyncpg.create_pool(**credentials)
     data = await bot.db.fetchrow("SELECT user_id FROM users WHERE blacklisted=true;")
