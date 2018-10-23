@@ -9,7 +9,7 @@ class Tags():
 
     @commands.group(invoke_without_command=True)
     async def tag(self,ctx,*,search):
-        data = await self.bot.db.fetch("SELECT * FROM tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,search)
+        data = await self.bot.db.fetchrow("SELECT * FROM tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,search)
         if data:
             return await ctx.send(data["content"])
         data = await self.bot.db.fetch("SELECT * FROM tags WHERE server_id=$1 AND name % $2 ORDER BY similarity(name,$2) DESC LIMIT 3;",ctx.guild.id,search)
@@ -19,8 +19,6 @@ class Tags():
         await ctx.send("This tag doesn't exist, try these instead: \n" + msg)
 
 
-        
-    
     @tag.command()
     async def create(self,ctx,name,*,content):
         data = await self.bot.db.fetch("SELECT * from tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,name)
