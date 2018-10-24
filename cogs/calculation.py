@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import math
+import sympy
 
 class Math():
 
@@ -75,6 +76,11 @@ class Math():
         except ValueError:
             await ctx.send('Domain Error')
         await ctx.send(str(answer))
+
+    @commands.command()
+    async def solve(self,ctx,*,equation):
+        answer = sympy.solvers.solve(equation,"x")
+        await ctx.send(answer)
 
 def setup(bot):
     bot.add_cog(Math(bot))
