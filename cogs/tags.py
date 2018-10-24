@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import difflib
 from .paginator import Pages, CannotPaginate
+import datetime
 
 class Tags():
     def __init__(self,bot):
@@ -25,7 +26,8 @@ class Tags():
         data = await self.bot.db.fetch("SELECT * from tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,name)
         if data:
             return await ctx.send("A tag with that name already exists")
-        await self.bot.db.execute("INSERT INTO tags VALUES ($1,$2,$3,$4,0);",ctx.guild.id,name,content,ctx.author.id)
+        now = str(datetime.datetime.utcnow())
+        await self.bot.db.execute("INSERT INTO tags VALUES ($1,$2,$3,$4,0,$5);",ctx.guild.id,name,content,ctx.author.id,now)
         await ctx.send(f"Tag {name} has been created")
 
     @tag.command()
@@ -59,6 +61,8 @@ class Tags():
         entries = []
         for entry in data:
             entries.append(entry["name"])
+        if len(entries) == 0:
+            return await ctx.send("You have no tags")
         p = Pages(ctx,entries=entries,per_page=20)
         await p.paginate()
 
@@ -85,18 +89,20 @@ class Tags():
         else:
             mention = owner.mention
         uses = data["uses"]
+        timestamp = data["created"]
         data = await self.bot.db.fetch("SELECT * FROM tags WHERE server_id=$1 ORDER BY uses DESC",ctx.guild.id)
         rank = 1
         for x in data:
             if x["name"] == name:
                 break
             rank+=1
+        timestamp = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S.%f")
         blurple = discord.Color.blurple()
-        em = discord.Embed(title = "Tag Information",description=name,color = blurple)
+        em = discord.Embed(title = "Tag Information",description=name,color = blurple, timestamp=timestamp)
         em.add_field(name = "Owner",value= mention)
         em.add_field(name = "Uses",value = str(uses))
         em.add_field(name="Rank",value=str(rank))
-        em.set_footer(text="Requested by "+ ctx.author.name, icon_url=ctx.author.avatar_url)
+        em.set_footer(text="Tag was Created")
         await ctx.send(embed=em)
 
     @tag.command()
