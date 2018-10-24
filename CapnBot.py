@@ -26,18 +26,20 @@ import aiohttp
 
 async def get_prefixes(bot,msg):
     if msg.guild == None:
-        prefix = "c!"
+        prefixes = ["c!"]
     else:
         try:
             data = await bot.db.fetchrow("SELECT * FROM prefixes WHERE guild_id=$1",msg.guild.id)
         except AttributeError:
             data = None
         if data == None:
-            prefix = "c!"
+            prefixes = ["c!"]
         else:
-            prefix = data["prefix"]
-            
-    return commands.when_mentioned_or(prefix)(bot,msg)
+            prefixes = data["prefix"]
+            prefixes = prefixes.split(",")
+            to_pop = len(prefixes) - 1
+            prefixes.pop(to_pop)
+    return commands.when_mentioned_or(*prefixes)(bot,msg)
 
 
 print(discord.__version__)
@@ -72,15 +74,18 @@ async def prefix(ctx, prefix):
 
 @prefix.command()
 @commands.guild_only()
-async def set(ctx,prefix):
+async def add(ctx,prefix):
     '''Sets a new prefix for the guild'''
     if not ((ctx.author.id == 422181415598161921) or (ctx.author.guild_permissions.administrator)):
         return await ctx.send("You don't have the permissions to use this command.")
     data = await bot.db.fetchrow("SELECT * FROM prefixes WHERE guild_id=$1",ctx.guild.id)
+    new_prefix = prefix + ","
     if data == None:
         await bot.db.execute("INSERT INTO prefixes VALUES ($1,$2);", ctx.guild.id, prefix)
     else:
-        await bot.db.execute("UPDATE prefixes SET prefix=$1 WHERE guild_id=$2;", prefix, ctx.guild.id)
+        prefixes = data["prefix"]
+        new_prefix = prefixes + new_prefix
+        await bot.db.execute("UPDATE prefixes SET prefix=$1 WHERE guild_id=$2;", new_prefix, ctx.guild.id)
     await ctx.send(f"The Prefix {prefix} can now be used to call commands.")
 
 @prefix.command()
@@ -89,7 +94,7 @@ async def clear(ctx):
     '''Clears all prefixes from the guild'''
     if not ctx.author.id == 422181415598161921:
         return await ctx.send("Not Enough Perms")
-    await bot.db.execute('UPDATE prefixes SET prefix=$1 WHERE guild_id=$2;', 'c!', ctx.guild.id)
+    await bot.db.execute('UPDATE prefixes SET prefix=$1 WHERE guild_id=$2;', 'c!,', ctx.guild.id)
     await ctx.send("Prefixes cleared. The only prefix that can be used is c!")
 
 @prefix.command()
@@ -98,10 +103,27 @@ async def show(ctx):
     '''Shows prefixes for the guild'''
     data = await bot.db.fetchrow("SELECT * FROM prefixes WHERE guild_id=$1",ctx.guild.id)
     if data == None:
-        prefix = ["c!"]
+        prefixes = ["c!"]
     else:
         prefix = data["prefix"]
-    await ctx.send("The prefix for this server is "+ prefix)
+        prefixes = prefix.split(",")
+    if len(prefixes) == 2:
+        return await ctx.send("The prefix for this server is " + prefixes[0])
+    elif len(prefixes) == 3:
+        return await ctx.send("The prefixes for this server are " + prefixes[0] + " and " + prefixes[1])
+    else:
+        msg= ""
+        i = 2
+        for x in prefixes:
+            if i == len(prefixes):
+                msg = msg + ", and " + x
+                break
+            elif i == 2:
+                msg = x
+            else:
+                msg = msg + ", " + x
+            i+=1
+        return await ctx.send("The prefixes for this server are "+ msg)
     
 
 @bot.command()
