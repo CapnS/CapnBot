@@ -266,7 +266,6 @@ async def on_message_edit(before,after):
 async def on_message(message):
     if (message.author.bot):
         return
-    '''
     if not message.guild:
         return await bot.process_commands(message)
     try:
@@ -300,7 +299,6 @@ async def on_message(message):
             return await message.channel.send(message.author.mention + " has been muted for saying the same thing 10 times in the past two minutes.")
         except:
             return await message.channel.send("Please stop saying the same things over and over " + message.author.mention)
-    '''
     if message.author.id in bot.blacklist:
         return
     await bot.process_commands(message)
@@ -323,7 +321,7 @@ async def on_command(ctx):
     await bot.db.execute("UPDATE commands SET uses=$1 WHERE command_name=$2;",uses,name)
     bot.counter += 1
 
-'''
+
 async def spam_resistance():
     bot.messages = {}
     messages = []
@@ -349,7 +347,7 @@ async def spam_resistance():
                         except:
                             pass
         asyncio.sleep(1)
-'''
+
 async def webserver():
     await bot.wait_until_ready()
     while not bot.is_closed():
