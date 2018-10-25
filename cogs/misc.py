@@ -229,6 +229,14 @@ class Misc():
         await ctx.send("Your Message has been Sent.")
 
     @commands.command()
+    async def avatar(self,ctx,user:discord.Member=None):
+        if not user:
+            user = ctx.author
+        yellow = discord.Color.yellow()
+        em = discord.Embed(title="Avatar URL",url = user.avatar_url,color=yellow)
+        em.set_image(url=user.avatar_url)
+
+    @commands.command()
     async def joindm(self, ctx, *, args):
         'Changes the DM users get when they join'
         if (not ctx.author.guild_permissions.administrator):
@@ -290,6 +298,7 @@ class Misc():
             current = previous + amount
             await self.bot.db.execute("UPDATE donors SET amount=$1 WHERE name=$2;",current,name)
             return await ctx.send(f"Updated {name}'s Donation amount to ${current}")
+
 
     @commands.command()
     async def donors(self, ctx):

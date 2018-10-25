@@ -349,7 +349,7 @@ async def spam_resistance():
                         except:
                             pass
         asyncio.sleep(1)
-
+'''
 async def webserver():
     await bot.wait_until_ready()
     while not bot.is_closed():
@@ -386,7 +386,7 @@ async def webserver():
         except :
             pass
         await asyncio.sleep(5)
-'''
+
 
 bot.loop.run_until_complete(set_up_token())
 #bot.loop.create_task(webserver())
