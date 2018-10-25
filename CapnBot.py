@@ -387,6 +387,6 @@ async def webserver():
 
 
 bot.loop.run_until_complete(set_up_token())
-#bot.loop.create_task(webserver())
-#bot.loop.create_task(spam_resistance())
+bot.loop.create_task(webserver())
+bot.loop.create_task(spam_resistance())
 bot.run(TOKEN)
