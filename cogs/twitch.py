@@ -16,9 +16,9 @@ class Twitch():
         twitch_id = data["twitch_oauth"]
         t = twitchio.client.Client(client_id=twitch_id,loop=self.bot.loop)
         stream = await t.get_stream_by_name(name)
-        data = stream["data"]
+        print(stream)
+        data = stream
         if data:
-            data = data[0]
             title = data["title"]
             viewers = data["viewer_count"]
             started = data["started_at"][11:19]
