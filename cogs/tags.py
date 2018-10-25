@@ -10,11 +10,35 @@ class Tags():
 
     @commands.group(invoke_without_command=True)
     async def tag(self,ctx,*,search):
+        '''responds with a tag'''
         data = await self.bot.db.fetchrow("SELECT * FROM tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,search)
         if data:
             uses = data["uses"]+1
             await self.bot.db.execute("UPDATE tags SET uses=$1 WHERE server_id=$2 AND name = $3;",uses,ctx.guild.id,search)
-            return await ctx.send(data["content"])
+            content = data["content"]
+            if "{" in content:
+                replacements = {"ctx.author.mention":ctx.author.mention, "ctx.author.id":ctx.author.id, "ctx.author.top_role":ctx.author.top_role,\
+                "ctx.author.name":ctx.author.name,"ctx.author.avatar_url":ctx.author.avatar_url, \
+                "ctx.author.joined_at":ctx.author.joined_at, "ctx.author.created_at":ctx.author.created_at, \
+                "ctx.author.roles":ctx.author.roles, "ctx.author.discriminator": ctx.author.discriminator,\
+                "ctx.channel.id":ctx.channel.id,"ctx.channel.name":ctx.channel.name,"ctx.channel.mention": ctx.channel.mention}
+                while "{" in content:
+                    to_replace = ""
+                    going = False
+                    for char in content:
+                        if char == "}":
+                            going = False
+                            break
+                        if going:
+                            to_replace = to_replace + char
+                        if char == "{":
+                            going = True
+                    try:
+                        print(to_replace)
+                        content = content.replace("{"+to_replace+"}",replacements[to_replace])
+                    except KeyError:
+                        return await ctx.send(content)
+            return await ctx.send(content)
         data = await self.bot.db.fetch("SELECT * FROM tags WHERE server_id=$1 AND name % $2 ORDER BY similarity(name,$2) DESC LIMIT 3;",ctx.guild.id,search)
         msg = ""
         for match in data:
@@ -23,6 +47,7 @@ class Tags():
 
     @tag.command()
     async def create(self,ctx,name,*,content):
+        '''creates a tag'''
         data = await self.bot.db.fetch("SELECT * from tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,name)
         if data:
             return await ctx.send("A tag with that name already exists")
@@ -32,6 +57,7 @@ class Tags():
 
     @tag.command()
     async def delete(self,ctx,*,name):
+        '''deletes a tag you own'''
         data = await self.bot.db.fetch("SELECT * from tags WHERE server_id=$1 AND name=$2 AND owner_id=$3;",ctx.guild.id,name,ctx.author.id)
         if data:
             await self.bot.db.execute("DELETE FROM tags WHERE server_id=$1 AND name=$2 AND owner_id=$3;",ctx.guild.id,name,ctx.author.id)
@@ -40,6 +66,7 @@ class Tags():
 
     @tag.command()
     async def edit(self,ctx,name,*,content):
+        '''edits a tag you own'''
         data = await self.bot.db.fetch("SELECT * from tags WHERE server_id=$1 AND name=$2 AND owner_id=$3;",ctx.guild.id,name,ctx.author.id)
         if data:
             await self.bot.db.execute("UPDATE tags SET content=$4 WHERE server_id=$1 AND name=$2 AND owner_id=$3;",ctx.guild.id,name,ctx.author.id,content)
@@ -48,6 +75,7 @@ class Tags():
 
     @tag.command()
     async def search(self,ctx,*,search):
+        '''searches for a tag'''
         data = await self.bot.db.fetch("SELECT * FROM tags WHERE server_id=$1 and name % $2 ORDER BY similarity(name,$2) DESC LIMIT 50;",ctx.guild.id,search)
         entries = []
         for row in data:
@@ -57,6 +85,7 @@ class Tags():
 
     @commands.command()
     async def tags(self,ctx):
+        '''shows all your tags in a server'''
         data = await self.bot.db.fetch("SELECT * FROM tags WHERE server_id=$1 AND owner_id=$2;",ctx.guild.id,ctx.author.id)
         entries = []
         for entry in data:
@@ -68,6 +97,7 @@ class Tags():
 
     @tag.command()
     async def claim(self,ctx,*,name):
+        '''claims an unowned tag'''
         data = await self.bot.db.fetchrow("SELECT * FROM tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,name)
         if not data:
             return await ctx.send("Tag doesn't exist")
@@ -80,6 +110,7 @@ class Tags():
 
     @tag.command()
     async def info(self,ctx,*,name):
+        '''gets info on a command'''
         data = await self.bot.db.fetchrow("SELECT * FROM tags WHERE server_id=$1 and name=$2;",ctx.guild.id,name)
         if not data:
             return await ctx.send("Tag not found")
@@ -107,6 +138,7 @@ class Tags():
 
     @tag.command()
     async def all(self,ctx):
+        ''' shows all tags for a server'''
         data = await self.bot.db.fetch("SELECT * FROM tags WHERE server_id=$1;",ctx.guild.id)
         if not data:
             return await ctx.send("This server has no tags")
