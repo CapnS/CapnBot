@@ -14,7 +14,7 @@ class Twitch():
     async def stream(self,ctx,name):
         data = await self.bot.db.fetchrow("SELECT * FROM keys;")
         twitch_id = data["twitch_oauth"]
-        t = twitchio.client.TwitchClient(client_id=twitch_id,loop=self.bot.loop)
+        t = twitchio.client.Client(client_id=twitch_id,loop=self.bot.loop)
         stream = await t.get_stream_by_name(name)
         data = stream["data"]
         if data:

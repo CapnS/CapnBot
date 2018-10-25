@@ -34,7 +34,6 @@ class Tags():
                         if char == "{":
                             going = True
                     try:
-                        print(to_replace)
                         content = content.replace("{"+to_replace+"}",replacements[to_replace])
                     except KeyError:
                         return await ctx.send(content)
