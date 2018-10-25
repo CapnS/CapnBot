@@ -232,7 +232,7 @@ class Misc():
     async def avatar(self,ctx,user:discord.Member=None):
         if not user:
             user = ctx.author
-        yellow = discord.Color.yellow()
+        yellow = discord.Color.gold()
         em = discord.Embed(title="Avatar URL",url = user.avatar_url,color=yellow)
         em.set_image(url=user.avatar_url)
 
