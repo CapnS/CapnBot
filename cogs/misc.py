@@ -235,6 +235,7 @@ class Misc():
         yellow = discord.Color.gold()
         em = discord.Embed(title="Avatar URL",url = user.avatar_url,color=yellow)
         em.set_image(url=user.avatar_url)
+        ctx.send(embed=em)
 
     @commands.command()
     async def joindm(self, ctx, *, args):
