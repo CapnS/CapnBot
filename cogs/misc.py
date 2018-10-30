@@ -237,49 +237,6 @@ class Misc():
         em.set_image(url=user.avatar_url)
         await ctx.send(embed=em)
 
-    @commands.command()
-    async def joindm(self, ctx, *, args):
-        'Changes the DM users get when they join'
-        if (not ctx.author.guild_permissions.administrator):
-            await ctx.send('Not enough Permissions')
-            return
-        found = False
-        guild = ctx.guild.id
-        with open('Files/DM File.txt', 'r') as dm_file:
-            lines = dm_file.readlines()
-            dm_dict = {
-                
-            }
-            lol = 2
-            for i in range(len(lines) - 1):
-                if (i % 2) == 1:
-                    dm_dict.update({
-                        '\n' + lines[i].strip(): lines[lol],
-                    })
-                    lol = lol + 2
-                    for key in dm_dict.keys():
-                        if key == ('\n' + str(guild)):
-                            found = True
-                            dm_dict[key] = str(args)
-                            value_list = []
-                            for value in dm_dict.values():
-                                value_list.append(str('\n' + str(value).strip()))
-            dm_file.close()
-        if (not found):
-            dm_dict.update({
-                '\n' + str(ctx.guild.id): args,
-            })
-            value_list = []
-            for value in dm_dict.values():
-                value_list.append(str('\n' + str(value).strip()))
-        with open('Files/DM File.txt', 'w') as dm_file:
-            i = 0
-            for key in dm_dict.keys():
-                dm_file.write(key)
-                dm_file.write(value_list[i])
-                i = i + 1
-            dm_file.close()
-        await ctx.send('The DM sent to users when they join has been set')
 
     @commands.command()
     async def donate(self, ctx):
