@@ -18,10 +18,11 @@ class Images():
         second_board = textwrap.fill(second_board,8)
         def do_edit():
             dir_path = os.path.dirname(os.path.realpath(__file__))
-            dir_path = dir_path + "/memes/car.jpg"
-            img = Image.open(dir_path)
+            car_path = dir_path + "/memes/car.jpg"
+            img = Image.open(car_path)
             draw = ImageDraw.Draw(img)
-            font = ImageFont.truetype("impact.ttf",40)
+            impact_path = dir_path + "/memes/impact.ttf"
+            font = ImageFont.truetype(impact_path,40)
             draw.text((330, 515),car,(255,255,255),font=font)
             draw.text((190, 90),first_board,(255,255,255),font=font)
             draw.text((427, 90),second_board,(255,255,255),font=font)
