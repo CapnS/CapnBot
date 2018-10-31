@@ -186,13 +186,13 @@ class MusicPlayer:
 class Music:
     """Music related commands."""
 
-    __slots__ = ('bot', 'players', 'votes','np')
+    __slots__ = ('bot', 'players', 'votes')
 
     def __init__(self, bot):
         self.bot = bot
         self.players = {}
         self.votes = []
-        self.np = MusicPlayer.get_np()
+
 
     async def cleanup(self, guild):
         try:
@@ -374,10 +374,10 @@ class Music:
         player = self.get_player(ctx)
         if not player.current:
             return await ctx.send('I am not currently playing anything!')
-
+        
         try:
             # Remove our previous now_playing message
-            await self.np.delete()
+            await player.np.delete()
         except discord.HTTPException:
             pass
 
@@ -403,7 +403,7 @@ class Music:
         em.add_field(name = ":headphones:Volume",value = f"{volume}%")
         em.add_field(name = ":link:Song URL", value = "[URL](source.web_url)")
         em.set_thumbnail(url=source.thumbnail)
-        self.np = await ctx.send(embed = em)
+        player.np = await ctx.send(embed = em)
 
     @commands.command(name='volume', aliases=['vol'])
     async def volume(self, ctx, *, vol: float):
