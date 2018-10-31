@@ -175,6 +175,9 @@ class MusicPlayer:
             except discord.HTTPException:
                 pass
 
+    def get_np(self):
+        return self.np
+
     def destroy(self, guild):
         """Disconnect and cleanup the player."""
         return self.bot.loop.create_task(self._cog.cleanup(guild))
@@ -183,12 +186,13 @@ class MusicPlayer:
 class Music:
     """Music related commands."""
 
-    __slots__ = ('bot', 'players', 'votes')
+    __slots__ = ('bot', 'players', 'votes','np')
 
     def __init__(self, bot):
         self.bot = bot
         self.players = {}
         self.votes = []
+        self.np = MusicPlayer.get_np()
 
     async def cleanup(self, guild):
         try:
@@ -361,18 +365,19 @@ class Music:
     async def playing(self, ctx):
         """Display information about the currently playing song."""
         vc = ctx.voice_client
-        source = vc.source
 
         if not vc or not vc.is_connected():
             return await ctx.send('I am not currently connected to voice!', delete_after=20)
+
+        source = vc.source
 
         player = self.get_player(ctx)
         if not player.current:
             return await ctx.send('I am not currently playing anything!')
 
         try:
-            # Remove our previous now_playing message.
-            await MusicPlayer.np.delete()
+            # Remove our previous now_playing message
+            await self.np.delete()
         except discord.HTTPException:
             pass
 
