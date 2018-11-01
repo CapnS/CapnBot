@@ -70,6 +70,31 @@ except:
 async def bash(ctx,*,command):
     if not ctx.author.id == 422181415598161921:
         return
+    start = time.time()
+    cmds = []
+    cmds.append(command)
+    tasks = []
+    tasks.append(run_command(*cmds))
+    results = run_asyncio_commands(tasks)
+    await ctx.send("```"+results+"```")
+    end = time.time()
+    await ctx.send('Script ran in ' + str(end - start) + ' seconds')
+
+async def run_command(*args):
+    process = await asyncio.create_subprocess_exec(*args,stdout=asyncio.subprocess.PIPE)
+    stdout, stderr = await process.communicate()
+    result = stdout.decode().strip()
+    return result
+
+def run_asyncio_commands(tasks):
+    commands = asyncio.gather(*tasks)
+    results = bot.loop.run_until_complete(commands)
+    return results
+
+
+
+
+
     process = await asyncio.create_subprocess_shell(command,stdout=asyncio.subprocess.PIPE)
     await ctx.send('Started:' + command + '(pid = ' + str(process.pid) + ')')
     stdout, stderr = await process.communicate()
