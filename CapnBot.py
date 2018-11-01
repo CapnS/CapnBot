@@ -23,7 +23,7 @@ import dweepy
 import asyncpg
 import os
 import aiohttp
-
+import subprocess
 
 async def get_prefixes(bot,msg):
     if msg.guild == None:
@@ -64,6 +64,21 @@ try:
     bot.webmessage = dweet['msg']
 except:
     bot.webmessage = ""
+
+
+@bot.command()
+async def bash(ctx,*,command):
+    if not ctx.author.id == 422181415598161921:
+        return
+    process = await asyncio.create_subprocess_shell(command,stdout=asyncio.subprocess.PIPE)
+    await ctx.send('Started:' + command + '(pid = ' + str(process.pid) + ')')
+    stdout, stderr = await process.communicate()
+    if process.returncode == 0:
+        await ctx.send('Done:' + command + '(pid = ' + str(process.pid) + ')')
+    else:
+        await ctx.send('Failed:' + command + '(pid = ' + str(process.pid) + ')')
+    result = stdout.decode().strip()
+    await ctx.send("```"+result+"```")  
 
 
 @bot.group(invoke_without_command=True)

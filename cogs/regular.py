@@ -10,7 +10,7 @@ import asyncio
 import dbl
 import traceback
 import aiohttp
-
+import copy
 
 class Regular():
 
@@ -34,7 +34,14 @@ class Regular():
         await msg.remove_reaction("\U00002b50",self.bot.user)
         await msg.edit(content="Removed Reaction")
 
-
+    @commands.command(aliases=["runas"])
+    async def sudo(self, ctx, who: discord.Member, *, command: str):
+        """Run a command as another user."""
+        msg = copy.copy(ctx.message)
+        msg.author = who
+        msg.content = ctx.prefix + command
+        new_ctx = await self.bot.get_context(msg)
+        await self.bot.invoke(new_ctx)    
 
     @commands.command(aliases = ["ubl"])
     async def unblacklist(self,ctx,user: discord.Member):
