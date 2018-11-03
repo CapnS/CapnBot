@@ -3,11 +3,14 @@ from discord.ext import commands
 import difflib
 from .paginator import Pages, CannotPaginate
 import datetime
+import re
 
 class Tags():
     def __init__(self,bot):
         self.bot = bot
 
+
+    
     @commands.group(invoke_without_command=True)
     async def tag(self,ctx,*,search):
         '''responds with a tag'''
@@ -16,28 +19,25 @@ class Tags():
             uses = data["uses"]+1
             await self.bot.db.execute("UPDATE tags SET uses=$1 WHERE server_id=$2 AND name = $3;",uses,ctx.guild.id,search)
             content = data["content"]
-            if "{" in content:
-                replacements = {"ctx.author.mention":ctx.author.mention, "ctx.author.id":ctx.author.id, "ctx.author.top_role":ctx.author.top_role,\
-                "ctx.author.name":ctx.author.name,"ctx.author.avatar_url":ctx.author.avatar_url, \
-                "ctx.author.joined_at":ctx.author.joined_at, "ctx.author.created_at":ctx.author.created_at, \
-                "ctx.author.roles":ctx.author.roles, "ctx.author.discriminator": ctx.author.discriminator,\
-                "ctx.channel.id":ctx.channel.id,"ctx.channel.name":ctx.channel.name,"ctx.channel.mention": ctx.channel.mention}
-                while "{" in content:
-                    to_replace = ""
-                    going = False
-                    for char in content:
-                        if char == "}":
-                            going = False
-                            break
-                        if going:
-                            to_replace = to_replace + char
-                        if char == "{":
-                            going = True
-                    try:
-                        content = content.replace("{"+to_replace+"}",str(replacements[to_replace]))
-                    except KeyError:
-                        return await ctx.send(content)
-            return await ctx.send(content)
+            regex = r"{(?:ctx\.([\w\.]+))}+"
+            def tag_replace(match):
+                full_match = match.group(0)
+                result = match.group(1)
+                subject = ctx
+                attrs = result.split('.')
+                if attrs[0] not in ['author', 'channel','message']:
+                    return full_match
+                try:
+                    for attr in attrs:
+                        if attr.startswith('_'):
+                            return full_match
+                        subject = getattr(subject, attr)
+                except AttributeError:
+                    return full_match
+                finally:
+                    return str(subject)
+            new_str = re.sub(regex, tag_replace, content, re.MULTILINE)
+            return await ctx.send(new_str)
         data = await self.bot.db.fetch("SELECT * FROM tags WHERE server_id=$1 AND name % $2 ORDER BY similarity(name,$2) DESC LIMIT 3;",ctx.guild.id,search)
         msg = ""
         for match in data:
