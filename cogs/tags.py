@@ -142,12 +142,13 @@ class Tags():
             rank+=1
         timestamp = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S.%f")
         blurple = discord.Color.blurple()
-        em = discord.Embed(title = "Tag Information",description=name,color = blurple, timestamp=timestamp)
         if not alias == "None":
+            em = discord.Embed(title = "Alias Information",description=name,color = blurple, timestamp=timestamp)
             em.add_field(name="Owner", value = mention)
             em.add_field(name = "Original",value = alias)
             em.set_footer(text = "Alias was Created")
             return await ctx.send(embed= em)
+        em = discord.Embed(title = "Tag Information",description=name,color = blurple, timestamp=timestamp)
         em.add_field(name = "Owner",value= mention)
         em.add_field(name = "Uses",value = str(uses))
         em.add_field(name="Rank",value=str(rank))
