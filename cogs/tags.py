@@ -45,13 +45,26 @@ class Tags():
         await ctx.send("This tag doesn't exist, try these instead: \n" + msg)
 
     @tag.command()
+    async def alias(self,ctx,name,*,new_name):
+        data = await self.bot.db.fetch("SELECT * from tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,new_name)
+        if data:
+            return await ctx.send("A tag or alias with that name already exists")
+        data = await self.bot.db.fetch("SELECT * from tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,name)
+        if not data:
+            return await ctx.send("Tag "+ name + " doesn't exist")
+        content = data["content"]
+        now = str(datetime.datetime.utcnow())
+        await self.bot.db.execute("INSERT INTO tags VALUES ($1,$2,$3,$4,0,$5,$6);",ctx.guild.id,new_name,content,ctx.author.id,now,name)
+        await ctx.send(f"Alias {new_name} has been created")        
+
+    @tag.command()
     async def create(self,ctx,name,*,content):
         '''creates a tag'''
         data = await self.bot.db.fetch("SELECT * from tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,name)
         if data:
-            return await ctx.send("A tag with that name already exists")
+            return await ctx.send("A tag or alias with that name already exists")
         now = str(datetime.datetime.utcnow())
-        await self.bot.db.execute("INSERT INTO tags VALUES ($1,$2,$3,$4,0,$5);",ctx.guild.id,name,content,ctx.author.id,now)
+        await self.bot.db.execute("INSERT INTO tags VALUES ($1,$2,$3,$4,0,$5,None);",ctx.guild.id,name,content,ctx.author.id,now)
         await ctx.send(f"Tag {name} has been created")
 
     @tag.command()
@@ -120,6 +133,7 @@ class Tags():
             mention = owner.mention
         uses = data["uses"]
         timestamp = data["created"]
+        alias = data["alias"]
         data = await self.bot.db.fetch("SELECT * FROM tags WHERE server_id=$1 ORDER BY uses DESC",ctx.guild.id)
         rank = 1
         for x in data:
@@ -129,6 +143,11 @@ class Tags():
         timestamp = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S.%f")
         blurple = discord.Color.blurple()
         em = discord.Embed(title = "Tag Information",description=name,color = blurple, timestamp=timestamp)
+        if not alias == "None":
+            em.add_field(name="Owner", value = mention)
+            em.add_field(name = "Original",value = alias)
+            em.set_footer(text = "Alias was Created")
+            return await ctx.send(embed= em)
         em.add_field(name = "Owner",value= mention)
         em.add_field(name = "Uses",value = str(uses))
         em.add_field(name="Rank",value=str(rank))

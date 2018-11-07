@@ -20,7 +20,6 @@ class Regular():
         self.start_time = time.time()
         bot.remove_command("help")
     
-    
     @commands.command()
     async def remove_after(self,ctx, seconds:int=3):
         '''adds and removes a reaction'''
@@ -91,8 +90,6 @@ class Regular():
         await ctx.send(embed=em)            
             
 
-
-              
     @commands.command()
     async def delete(self, ctx, amount:int):
         'Deletes Messages'
