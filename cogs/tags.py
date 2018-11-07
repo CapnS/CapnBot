@@ -49,7 +49,7 @@ class Tags():
         data = await self.bot.db.fetch("SELECT * from tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,new_name)
         if data:
             return await ctx.send("A tag or alias with that name already exists")
-        data = await self.bot.db.fetch("SELECT * from tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,name)
+        data = await self.bot.db.fetchrow("SELECT * from tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,name)
         if not data:
             return await ctx.send("Tag "+ name + " doesn't exist")
         content = data["content"]
