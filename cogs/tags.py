@@ -167,6 +167,21 @@ class Tags():
         p = Pages(ctx,entries=entries,per_page=20)
         await p.paginate()        
 
+    @tag.command()
+    async def raw(self,ctx,*,name):
+        data = await self.bot.db.fetchrow("SELECT * FROM tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,search)
+        if not data:
+            return await ctx.send("Tag "+ name + " wasn't found")
+        content = data["content"]
+        transformations = {
+            re.escape(c): '\\' + c
+            for c in ('*', '`', '_', '~', '\\', '<')
+        }
+        def replace(obj):
+            return transformations.get(re.escape(obj.group(0)), '')
+
+        pattern = re.compile('|'.join(transformations.keys()))
+        await ctx.send(pattern.sub(replace, content))
 
 def setup(bot):
     bot.add_cog(Tags(bot))
