@@ -64,7 +64,7 @@ class Tags():
         if data:
             return await ctx.send("A tag or alias with that name already exists")
         now = str(datetime.datetime.utcnow())
-        await self.bot.db.execute("INSERT INTO tags VALUES ($1,$2,$3,$4,0,$5,None);",ctx.guild.id,name,content,ctx.author.id,now)
+        await self.bot.db.execute("INSERT INTO tags VALUES ($1,$2,$3,$4,0,$5,'None');",ctx.guild.id,name,content,ctx.author.id,now)
         await ctx.send(f"Tag {name} has been created")
 
     @tag.command()
