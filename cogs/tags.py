@@ -169,7 +169,7 @@ class Tags():
 
     @tag.command()
     async def raw(self,ctx,*,name):
-        data = await self.bot.db.fetchrow("SELECT * FROM tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,search)
+        data = await self.bot.db.fetchrow("SELECT * FROM tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,name)
         if not data:
             return await ctx.send("Tag "+ name + " wasn't found")
         content = data["content"]
