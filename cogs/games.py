@@ -7,8 +7,86 @@ import json
 import aiohttp
 import asyncpg
 from .paginator import Pages, CannotPaginate
+from random import randint
 
+class Player:
+    def __init__(self):
+        pass
 
+    def get_move(self,grids):
+        test_grids = grids
+        player = 2
+        n = 6
+        x=0
+        for grid in test_grids:
+            i = 0
+            for cell in grid:
+                if cell == 0:
+                    test_grids[x][i] = player
+                    ai_will_win = self.check_if_won(test_grids,player,n)
+                    if ai_will_win:
+                        test_grids[x][i] = 0
+                        return i+1
+                    test_grids[x][i] = 0
+                i+=1
+            x+=1
+        player = 1
+        test_grids = grids
+        x=0
+        for grid in test_grids:
+            i = 0
+            for cell in grid:
+                if cell == 0:
+                    test_grids[x][i] = player
+                    player_will_win = self.check_if_won(test_grids,player,n)
+                    if player_will_win:
+                        test_grids[x][i] = 0
+                        return i+1
+                    test_grids[x][i] = 0
+                i+=1
+            x+=1
+        return randint(1,6)
+
+    def check_if_won(self,grids,player,n):
+        if self.horcheck_won(grids,player) or self.diagcheck_won(grids,player,n) or self.vertcheck_won(grids,player,n):
+            return True
+
+    def horcheck_won(self,grids, player):
+        amount = 0
+        for grid in grids:
+            for cell in grid:
+                if cell == player:
+                    amount+=1
+                    if amount >= 4:
+                        return True
+                else:
+                    amount=0
+            amount=0
+        return False
+
+    def vertcheck_won(self,grids,player,n):
+        amount = 0
+        for i in range(n):
+            for grid in grids:
+                if grid[i] == player:
+                    amount+=1
+                    if amount >= 4:
+                        return True
+                else:
+                    amount = 0
+        return False
+
+    def diagcheck_won(self, grids, player, n):
+        for x in range(n - 3):
+            for y in range(3, n):
+                if grids[x][y] == player and grids[x+1][y-1] == player and grids[x+2][y-2] == player and grids[x+3][y-3] == player:
+                    return True
+
+        for x in range(n - 3):
+            for y in range(n - 3):
+                if grids[x][y] == player and grids[x+1][y+1] == player and grids[x+2][y+2] == player and grids[x+3][y+3] == player:
+                    return True
+                    
 class Games():
 
     def __init__(self, bot):
@@ -323,7 +401,8 @@ class Games():
                     if amount >= 4:
                         return True
                 else:
-                    amount=0   
+                    amount=0
+            amount = 0  
         return False
 
     def vertcheck_won(self,grids,player,n):
@@ -510,6 +589,107 @@ class Games():
         p = Pages(ctx,entries=balances)
         await p.paginate()
 
+    @commands.command()
+    async def aiconnect4(self,ctx,n:int):
+        if n < 4:
+            return await ctx.send("Too small of a board")
+        grids = [[0]*n for _ in range(n)]
+        player = 1
+        msg = ""
+        for x in grids:
+            x = str(x)
+            x = x.replace("0","⚪")
+            msg = msg + x + "\n"
+        green = discord.Color.green()
+        em = discord.Embed(title="Current Board", description= msg,color = green)
+        em.set_footer(text=f"{ctx.author}'s Turn")
+        message = await ctx.send(embed = em)
+        user = "AI"
+        await self.ai_domove(grids,player,n,ctx,message,user)
 
+    async def ai_domove(self,grids,player,n,ctx,message,user):
+        ai = Player()
+        move=0
+        while not 0 < move <= n:
+            if player == 1:
+                await ctx.send(f"Which coloumn do you want to place your checker in Player {player}(1-{n})")
+                def check(message):
+                    return message.author == ctx.author and message.clean_content.isdigit()
+                try:
+                    msg = await self.bot.wait_for('message',check = check,timeout=60)
+                except:
+                    pass
+                msg = msg.clean_content
+                try:
+                    move = int(msg)
+                except ValueError:
+                    pass
+            else:
+                move = ai.get_move(grids)
+        num=0
+        for grid in grids:
+            if num == 0:
+                if grids[0][move-1] != 0:
+                    await ctx.send("That column is full")
+                    await self.ai_domove(grids,player,n,ctx,message,user)
+            if grid[move-1] == 0:
+                if num == n-1:
+                    grids[num][move-1]=player
+                else:
+                    num+=1
+            else:
+                grids[num-1][move-1]=player
+        await self.ai_check_if_won(grids,player,n,message,ctx,user)
+        
+    async def ai_check_if_won(self,grids,player,n,message,ctx,user):
+        if self.horcheck_won(grids,player) or self.diagcheck_won(grids,player,n) or self.vertcheck_won(grids,player,n):
+            if player == 1:
+                mention = ctx.author
+            else:
+                mention = user
+            await message.delete()
+            blurple = discord.Color.blurple()
+            msg = ""
+            for x in grids:
+                x = str(x)
+                x = x.replace("0","⚪")
+                x = x.replace("1", "⚫")
+                x = x.replace("2", "🔴")
+                msg = msg + x + "\n"
+            em = discord.Embed(title="Current Board", description= msg,color = blurple)
+            if player == 1:
+                mention = ctx.author
+            else:
+                mention = user
+            em.set_footer(text=f"{mention} won the Game")
+            return await ctx.send(embed = em)
+        await self.ai_print_table(grids,message,ctx,player,user,n)
+
+    async def ai_print_table(self, grids, message,ctx,player,user,n):
+        await message.delete()
+        green = discord.Color.green()
+        msg = ""
+        for x in grids:
+            x = str(x)
+            x = x.replace("0","⚪")
+            x = x.replace("1", "⚫")
+            x = x.replace("2", "🔴")
+            msg = msg + x +"\n"
+        em = discord.Embed(title="Current Board", description= msg,color = green)
+        if player == 2:
+            mention = ctx.author
+        else:
+            mention = user
+        em.set_footer(text=f"{mention}'s Turn")
+        message=await ctx.send(embed = em)
+        if not self.Won:
+            if player == 1:
+                player = 2
+            else:
+                player = 1
+            await self.ai_domove(grids,player,n,ctx,message,user)
+        else:
+            self.Won=False
+    
 def setup(bot):
     bot.add_cog(Games(bot))
