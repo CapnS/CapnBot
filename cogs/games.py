@@ -47,7 +47,7 @@ class Player:
             x+=1
         return randint(1,6)
 
-     def check_if_won(self,grids,player,n):
+    def check_if_won(self,grids,player,n):
         if self.horcheck_won(grids,player) or self.diagcheck_won(grids,player,n) or self.vertcheck_won(grids,player,n):
             return True
 
