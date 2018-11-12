@@ -47,7 +47,7 @@ class Player:
             x+=1
         return randint(1,6)
 
-    def check_if_won(self,grids,player,n):
+     def check_if_won(self,grids,player,n):
         if self.horcheck_won(grids,player) or self.diagcheck_won(grids,player,n) or self.vertcheck_won(grids,player,n):
             return True
 
@@ -74,6 +74,7 @@ class Player:
                         return True
                 else:
                     amount = 0
+            amount = 0
         return False
 
     def diagcheck_won(self, grids, player, n):
@@ -392,32 +393,37 @@ class Games():
         else:
             self.Won=False
 
+    def check_if_won(self,grids,player,n):
+        if self.horcheck_won(grids,player) or self.diagcheck_won(grids,player,n) or self.vertcheck_won(grids,player,n):
+            return True
+
     def horcheck_won(self,grids, player):
-        amount=0
+        amount = 0
         for grid in grids:
-            for x in grid:
-                if x == player:
+            for cell in grid:
+                if cell == player:
                     amount+=1
                     if amount >= 4:
                         return True
                 else:
                     amount=0
-            amount = 0  
+            amount=0
         return False
 
     def vertcheck_won(self,grids,player,n):
+        amount = 0
         for i in range(n):
             for grid in grids:
-                amount=0
                 if grid[i] == player:
                     amount+=1
                     if amount >= 4:
                         return True
                 else:
                     amount = 0
+            amount = 0
         return False
 
-    def diagcheck_won(self,grids, player, n):
+    def diagcheck_won(self, grids, player, n):
         for x in range(n - 3):
             for y in range(3, n):
                 if grids[x][y] == player and grids[x+1][y-1] == player and grids[x+2][y-2] == player and grids[x+3][y-3] == player:
