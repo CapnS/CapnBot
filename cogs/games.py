@@ -420,13 +420,13 @@ class Games():
         return False
 
     def diagcheck_won(self, grids, player, n):
-        for x in range(4):
+        for x in range(3):
             for y in range(3, 6):
                 if grids[x][y] == player and grids[x+1][y-1] == player and grids[x+2][y-2] == player and grids[x+3][y-3] == player:
                     return True
 
-        for x in range(4):
-            for y in range(6):
+        for x in range(3):
+            for y in range(3):
                 if grids[x][y] == player and grids[x+1][y+1] == player and grids[x+2][y+2] == player and grids[x+3][y+3] == player:
                     return True
 
@@ -667,9 +667,6 @@ class Games():
         await self.ai_print_table(grids,message,ctx,player,user,n)
 
     async def ai_print_table(self, grids, message,ctx,player,user,n):
-        if player == 2:
-            await self.ai_domove(grids,player,n,ctx,message,user)
-            return
         await message.delete()
         green = discord.Color.green()
         msg = ""
@@ -693,6 +690,11 @@ class Games():
                 player = 1
             await self.ai_domove(grids,player,n,ctx,message,user)
         else:
+            if player == 1:
+                player = 2
+            else:
+                player = 1  
+            await self.ai_domove
             self.Won=False
     
 def setup(bot):
