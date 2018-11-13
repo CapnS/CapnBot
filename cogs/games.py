@@ -367,7 +367,7 @@ class Games():
         
         
     async def print_table(self, grids,message,ctx,player,user,n):
-        await message.delete()
+        
         green = discord.Color.green()
         msg = ""
         for x in grids:
@@ -382,12 +382,13 @@ class Games():
         else:
             mention = user
         em.set_footer(text=f"{mention}'s Turn")
-        message=await ctx.send(embed = em)
+        await message.edit(embed=em)
         if not self.Won:
             if player == 1:
                 player = 2
             else:
                 player = 1
+
             await self.domove(grids,player,n,message,ctx,user)
         else:
             self.Won=False
@@ -667,7 +668,6 @@ class Games():
         await self.ai_print_table(grids,message,ctx,player,user,n)
 
     async def ai_print_table(self, grids, message,ctx,player,user,n):
-        await message.delete()
         green = discord.Color.green()
         msg = ""
         for x in grids:
@@ -682,7 +682,7 @@ class Games():
         else:
             mention = user
         em.set_footer(text=f"{mention}'s Turn")
-        message=await ctx.send(embed = em)
+        await message.edit(embed=em)
         if not self.Won:
             if player == 1:
                 player = 2
@@ -690,11 +690,6 @@ class Games():
                 player = 1
             await self.ai_domove(grids,player,n,ctx,message,user)
         else:
-            if player == 1:
-                player = 2
-            else:
-                player = 1  
-            await self.ai_domove
             self.Won=False
     
 def setup(bot):
