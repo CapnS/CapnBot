@@ -78,13 +78,13 @@ class Player:
         return False
 
     def diagcheck_won(self, grids, player, n):
-        for x in range(n - 3):
-            for y in range(3, n):
+        for x in range(4):
+            for y in range(3, 6):
                 if grids[x][y] == player and grids[x+1][y-1] == player and grids[x+2][y-2] == player and grids[x+3][y-3] == player:
                     return True
 
-        for x in range(n - 3):
-            for y in range(n - 3):
+        for x in range(4):
+            for y in range(3):
                 if grids[x][y] == player and grids[x+1][y+1] == player and grids[x+2][y+2] == player and grids[x+3][y+3] == player:
                     return True
                     
@@ -291,10 +291,9 @@ class Games():
         await self.bot.db.execute("UPDATE users SET balance=$1 WHERE user_id=$2",current,ctx.author.id)
 
     @commands.command()
-    async def connect4(self,ctx, user: discord.Member,n:int=4):
-        if n < 4:
-            return await ctx.send("Not a large enough grid.")
-        grids = [[0]*n for _ in range(n)]
+    async def connect4(self,ctx, user: discord.Member):
+        n=6
+        grids = [[0]*7 for _ in range(6)]
         green = discord.Color.green()
         msg = ""
         for x in grids:
@@ -334,8 +333,8 @@ class Games():
 
     async def domove(self,grids,player,n,message,ctx,user):
         move=0
-        while not 0 < move <= n:
-            await ctx.send(f"Which coloumn do you want to place your checker in Player {player}(1-{n})")
+        while not 0 < move <= 7:
+            await ctx.send(f"Which coloumn do you want to place your checker in Player {player}(1-{7})")
             if player == 1:
                 def check(message):
                     return message.author == ctx.author and message.clean_content.isdigit()
@@ -358,7 +357,7 @@ class Games():
                     await ctx.send("That column is full")
                     await self.domove(grids,player,n,message,ctx,user)
             if grid[move-1] == 0:
-                if num == n-1:
+                if num == 5:
                     grids[num][move-1]=player
                 else:
                     num+=1
@@ -412,7 +411,7 @@ class Games():
 
     def vertcheck_won(self,grids,player,n):
         amount = 0
-        for i in range(n):
+        for i in range(7):
             for grid in grids:
                 if grid[i] == player:
                     amount+=1
@@ -424,13 +423,13 @@ class Games():
         return False
 
     def diagcheck_won(self, grids, player, n):
-        for x in range(n - 3):
-            for y in range(3, n):
+        for x in range(4):
+            for y in range(3, 6):
                 if grids[x][y] == player and grids[x+1][y-1] == player and grids[x+2][y-2] == player and grids[x+3][y-3] == player:
                     return True
 
-        for x in range(n - 3):
-            for y in range(n - 3):
+        for x in range(4):
+            for y in range(6):
                 if grids[x][y] == player and grids[x+1][y+1] == player and grids[x+2][y+2] == player and grids[x+3][y+3] == player:
                     return True
 
@@ -596,10 +595,9 @@ class Games():
         await p.paginate()
 
     @commands.command()
-    async def aiconnect4(self,ctx,n:int):
-        if n < 4:
-            return await ctx.send("Too small of a board")
-        grids = [[0]*n for _ in range(n)]
+    async def aiconnect4(self,ctx):
+        n=7
+        grids = [[0]*7 for _ in range(6)]
         player = 1
         msg = ""
         for x in grids:
@@ -616,9 +614,9 @@ class Games():
     async def ai_domove(self,grids,player,n,ctx,message,user):
         ai = Player()
         move=0
-        while not 0 < move <= n:
+        while not 0 < move <= 7:
             if player == 1:
-                await ctx.send(f"Which coloumn do you want to place your checker in Player {player}(1-{n})")
+                await ctx.send(f"Which coloumn do you want to place your checker in Player {player}(1-{7})")
                 def check(message):
                     return message.author == ctx.author and message.clean_content.isdigit()
                 try:
@@ -639,7 +637,7 @@ class Games():
                     await ctx.send("That column is full")
                     await self.ai_domove(grids,player,n,ctx,message,user)
             if grid[move-1] == 0:
-                if num == n-1:
+                if num == 5:
                     grids[num][move-1]=player
                 else:
                     num+=1
