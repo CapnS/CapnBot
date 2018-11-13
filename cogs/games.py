@@ -587,8 +587,9 @@ class Games():
                 for x in user2:
                     user_amount2+=x
                 while user_amount1 < 22:
+                    await message.delete()
                     green = discord.Color.green()
-                    em = discord.Embed(title="Blackjack",description=ctx.author.name,color= green)
+                    em = discord.Embed(title="Blackjack - Hand One",description=ctx.author.name,color= green)
                     em.add_field(name="Dealer",value = "["+str(dealer[0])+",?]")
                     em.add_field(name=ctx.author.name,value=user1)
                     message = await ctx.send(embed = em)
@@ -621,27 +622,22 @@ class Games():
                             if user_amount1 > 21:
                                 await message.delete()
                                 red = discord.Color.red()
-                                em = discord.Embed(title="Blackjack",description="Bust, Dealer Wins This hand",color=red)
+                                em = discord.Embed(title="Blackjack - Hand One",description="Bust, Dealer Wins This hand",color=red)
                                 em.add_field(name="Dealer",value = str(dealer))
                                 em.add_field(name=ctx.author.name,value=user1)
                                 current = users_money - bet
                                 await self.bot.db.execute("UPDATE users SET balance=$1 WHERE user_id=$2",current,ctx.author.id)
                                 await ctx.send(embed = em)
                                 break
-                        await message.delete()
-                        green = discord.Color.green()
-                        em = discord.Embed(title="Blackjack",description=ctx.author.name,color= green)
-                        em.add_field(name="Dealer",value = "["+str(dealer[0])+",?]")
-                        em.add_field(name=ctx.author.name,value=user1)
-                        message = await ctx.send(embed = em)
                     elif play == "?":
                         hint = self.get_hint(user1,dealer)
                         await ctx.send(hint)
                     elif play == "s":
                         break
                 while user_amount2 < 22:
+                    await message.delete()
                     green = discord.Color.green()
-                    em = discord.Embed(title="Blackjack",description=ctx.author.name,color= green)
+                    em = discord.Embed(title="Blackjack - Hand Two",description=ctx.author.name,color= green)
                     em.add_field(name="Dealer",value = "["+str(dealer[0])+",?]")
                     em.add_field(name=ctx.author.name,value=user2)
                     message = await ctx.send(embed = em)
@@ -673,18 +669,13 @@ class Games():
                                     i+=1
                             if user_amount2 > 21:
                                 red = discord.Color.red()
-                                em = discord.Embed(title="Blackjack",description="Bust, Dealer Wins This hand",color=red)
+                                em = discord.Embed(title="Blackjack - Hand Two",description="Bust, Dealer Wins This hand",color=red)
                                 em.add_field(name="Dealer",value = str(dealer))
                                 em.add_field(name=ctx.author.name,value=user2)
                                 current = users_money - bet
                                 await self.bot.db.execute("UPDATE users SET balance=$1 WHERE user_id=$2",current,ctx.author.id)
                                 await ctx.send(embed = em)
                                 break
-                        green = discord.Color.green()
-                        em = discord.Embed(title="Blackjack",description=ctx.author.name,color= green)
-                        em.add_field(name="Dealer",value = "["+str(dealer[0])+",?]")
-                        em.add_field(name=ctx.author.name,value=user2)
-                        message = await ctx.send(embed = em)
                     elif play == "?":
                         hint = self.get_hint(user1,dealer)
                         await ctx.send(hint)
