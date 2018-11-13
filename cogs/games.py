@@ -439,7 +439,7 @@ class Games():
         users_money = data["balance"]
         if users_money < bet:
             return await ctx.send("You don't have enough money to make that bet") 
-        await ctx.send("Send a ? for a hint")       
+        await ctx.send("Send help for help on how to play!")       
         dealer = []
         user = []
         for i in range(2):
@@ -564,8 +564,8 @@ class Games():
                 break     
             elif play == "split":
                 await ctx.send("Split successful, starting with the first hand.")
-                user1 = user[0]
-                user2 = user[1]
+                user1 = [user[0]]
+                user2 = [user[1]]
                 card = random.randint(1,13)
                 if card >= 10:
                     card = 10
