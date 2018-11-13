@@ -392,9 +392,6 @@ class Games():
         else:
             self.Won=False
 
-    def check_if_won(self,grids,player,n):
-        if self.horcheck_won(grids,player) or self.diagcheck_won(grids,player,n) or self.vertcheck_won(grids,player,n):
-            return True
 
     def horcheck_won(self,grids, player):
         amount = 0
