@@ -668,6 +668,9 @@ class Games():
 
     async def ai_print_table(self, grids, message,ctx,player,user,n):
         await message.delete()
+        if player == 2:
+            await self.ai_domove(grids,player,n,ctx,message,user)
+            return
         green = discord.Color.green()
         msg = ""
         for x in grids:
