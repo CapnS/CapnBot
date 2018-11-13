@@ -614,17 +614,19 @@ class Games():
         move=0
         while not 0 < move <= 7:
             if player == 1:
-                await ctx.send(f"Which coloumn do you want to place your checker in Player {player}(1-{7})")
+                get = await ctx.send(f"Which coloumn do you want to place your checker in Player {ctx.author.name}(1-{7})")
                 def check(message):
                     return message.author == ctx.author and message.clean_content.isdigit()
                 try:
                     msg = await self.bot.wait_for('message',check = check,timeout=60)
                 except:
                     pass
-                msg = msg.clean_content
+                content = msg.clean_content
                 try:
-                    move = int(msg)
-                except ValueError:
+                    move = int(content)
+                    await get.delete()
+                    await msg.delete()
+                except:
                     pass
             else:
                 move = ai.get_move(grids)
