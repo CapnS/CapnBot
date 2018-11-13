@@ -474,7 +474,7 @@ class Games():
             em.add_field(name=ctx.author.name,value=user)
             return await ctx.send(embed = em)  
         while user_amount < 22:
-            if len(user) == 2:
+            if len(user) == 2 and user[0] == user[1]:
                 def check(message):
                     return message.author == ctx.author and message.content in ("h","s","?","d","split", "help")
             else:
@@ -587,6 +587,11 @@ class Games():
                 for x in user2:
                     user_amount2+=x
                 while user_amount1 < 22:
+                    green = discord.Color.green()
+                    em = discord.Embed(title="Blackjack",description=ctx.author.name,color= green)
+                    em.add_field(name="Dealer",value = "["+str(dealer[0])+",?]")
+                    em.add_field(name=ctx.author.name,value=user1)
+                    message = await ctx.send(embed = em)
                     def check1(message):
                         return message.author == ctx.author and message.content in ("h","s","?")
                     try:
@@ -635,6 +640,11 @@ class Games():
                     elif play == "s":
                         break
                 while user_amount2 < 22:
+                    green = discord.Color.green()
+                    em = discord.Embed(title="Blackjack",description=ctx.author.name,color= green)
+                    em.add_field(name="Dealer",value = "["+str(dealer[0])+",?]")
+                    em.add_field(name=ctx.author.name,value=user2)
+                    message = await ctx.send(embed = em)
                     def check2(message):
                         return message.author == ctx.author and message.content in ("h","s","?")
                     try:
@@ -662,7 +672,6 @@ class Games():
                                         break
                                     i+=1
                             if user_amount2 > 21:
-                                await message.delete()
                                 red = discord.Color.red()
                                 em = discord.Embed(title="Blackjack",description="Bust, Dealer Wins This hand",color=red)
                                 em.add_field(name="Dealer",value = str(dealer))
@@ -671,7 +680,6 @@ class Games():
                                 await self.bot.db.execute("UPDATE users SET balance=$1 WHERE user_id=$2",current,ctx.author.id)
                                 await ctx.send(embed = em)
                                 break
-                        await message.delete()
                         green = discord.Color.green()
                         em = discord.Embed(title="Blackjack",description=ctx.author.name,color= green)
                         em.add_field(name="Dealer",value = "["+str(dealer[0])+",?]")
@@ -754,7 +762,6 @@ class Games():
                 await ctx.send(embed = em)
                 await ctx.send("Your new balance is $"+str(current)) 
         if dealer_amount == 21 and user_amount != 21:
-            await message.delete()
             red = discord.Color.red()
             em = discord.Embed(title="Blackjack",description="Dealer has blackjack, You Lose",color=red)
             em.add_field(name="Dealer",value = dealer)
@@ -795,19 +802,16 @@ class Games():
             em.add_field(name="Dealer",value = dealer)
             em.add_field(name=ctx.author.name,value=user)
             message = await ctx.send(embed = em)
-        if dealer_amount > user_amount:
-            await message.delete() 
+        if dealer_amount > user_amount: 
             red = discord.Color.red()       
             em = discord.Embed(title="Blackjack",description="Dealer Wins",color=red)
             current = users_money - bet
             await self.bot.db.execute("UPDATE users SET balance=$1 WHERE user_id=$2",current,ctx.author.id)
         elif dealer_amount == user_amount:
-            await message.delete()
             gold = discord.Color.gold()
             em = discord.Embed(title= "Blackjack",description = "It's a Draw",color = gold)
             current = users_money
         else:
-            await message.delete()
             blue = discord.Color.blue()
             em = discord.Embed(title="Blackjack",description="You win!",color=blue)
             current = users_money + bet
