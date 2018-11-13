@@ -78,12 +78,12 @@ class Player:
         return False
 
     def diagcheck_won(self, grids, player, n):
-        for x in range(4):
+        for x in range(3):
             for y in range(3, 6):
                 if grids[x][y] == player and grids[x+1][y-1] == player and grids[x+2][y-2] == player and grids[x+3][y-3] == player:
                     return True
 
-        for x in range(4):
+        for x in range(3):
             for y in range(3):
                 if grids[x][y] == player and grids[x+1][y+1] == player and grids[x+2][y+2] == player and grids[x+3][y+3] == player:
                     return True
