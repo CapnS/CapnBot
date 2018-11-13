@@ -438,7 +438,8 @@ class Games():
             return await ctx.send(f"Use {ctx.prefix}start to use this command")
         users_money = data["balance"]
         if users_money < bet:
-            return await ctx.send("You don't have enough money to make that bet")        
+            return await ctx.send("You don't have enough money to make that bet") 
+        await ctx.send("Send a ? for a hint")       
         dealer = []
         user = []
         for i in range(2):
@@ -473,14 +474,20 @@ class Games():
             em.add_field(name=ctx.author.name,value=user)
             return await ctx.send(embed = em)  
         while user_amount < 22:
-            def check(message):
-                return message.author == ctx.author and message.content in ("h","s")
+            if len(user) == 2:
+                def check(message):
+                    return message.author == ctx.author and message.content in ("h","s","?","d","split", "help")
+            else:
+                def check(message):
+                    return message.author == ctx.author and message.content in ("h","s","?","d", "help")
             try:
                 play = await self.bot.wait_for('message',check = check,timeout=60)
             except:
                 return
             play = play.clean_content
-            if play == "h":
+            if play == "help":
+                await ctx.send("Send These to do Actions: \n h - Hit \n s - Stand \n d - Double Down \n split - Split \n ? - Get a Hint")
+            elif play == "h":
                 card = random.randint(1,13)
                 if card >= 10:
                     card = 10
@@ -514,9 +521,239 @@ class Games():
                 em.add_field(name="Dealer",value = "["+str(dealer[0])+",?]")
                 em.add_field(name=ctx.author.name,value=user)
                 message = await ctx.send(embed = em)
-            else:
+            elif play == "?":
+                hint = self.get_hint(user,dealer)
+                await ctx.send(hint)
+            elif play == "s":
                 break
-        if dealer_amount == 21:
+            elif play == "d":
+                bet*=2
+                card = random.randint(1,13)
+                if card >= 10:
+                    card = 10
+                if card == 1:
+                    if user_amount + 11 <= 21:
+                        card = 11
+                user.append(card)
+                user_amount+=card
+                if user_amount > 21:
+                    if 11 in user:
+                        i = 0
+                        for x in user:
+                            if x == 11:
+                                user.pop(i)
+                                user.append(1)
+                                user_amount-=10
+                                break
+                            i+=1
+                    if user_amount > 21:
+                        await message.delete()
+                        red = discord.Color.red()
+                        em = discord.Embed(title="Blackjack",description="Bust, Dealer Wins",color=red)
+                        em.add_field(name="Dealer",value = str(dealer))
+                        em.add_field(name=ctx.author.name,value=user)
+                        current = users_money - bet
+                        await self.bot.db.execute("UPDATE users SET balance=$1 WHERE user_id=$2",current,ctx.author.id)
+                        return await ctx.send(embed = em)
+                await message.delete()
+                green = discord.Color.green()
+                em = discord.Embed(title="Blackjack",description=ctx.author.name,color= green)
+                em.add_field(name="Dealer",value = "["+str(dealer[0])+",?]")
+                em.add_field(name=ctx.author.name,value=user)
+                message = await ctx.send(embed = em)
+                break     
+            elif play == "split":
+                await ctx.send("Split successful, starting with the first hand.")
+                user1 = user[0]
+                user2 = user[1]
+                card = random.randint(1,13)
+                if card >= 10:
+                    card = 10
+                if card == 1:
+                    if user_amount + 11 <= 21:
+                        card = 11
+                user1.append(card)
+                card = random.randint(1,13)
+                if card >= 10:
+                    card = 10
+                if card == 1:
+                    if user_amount + 11 <= 21:
+                        card = 11
+                user2.append(card)
+                user_amount1 = 0
+                user_amount2 = 0
+                for x in user1:
+                    user_amount1+=x
+                for x in user2:
+                    user_amount2+=x
+                while user_amount1 < 22:
+                    def check1(message):
+                        return message.author == ctx.author and message.content in ("h","s","?")
+                    try:
+                        play = await self.bot.wait_for('message',check = check1,timeout=60)
+                    except:
+                        return
+                    play = play.clean_content
+                    if play == "h":
+                        card = random.randint(1,13)
+                        if card >= 10:
+                            card = 10
+                        if card == 1:
+                            if user_amount1 + 11 <= 21:
+                                card = 11
+                        user1.append(card)
+                        user_amount1+=card
+                        if user_amount1 > 21:
+                            if 11 in user1:
+                                i = 0
+                                for x in user1:
+                                    if x == 11:
+                                        user1.pop(i)
+                                        user1.append(1)
+                                        user_amount1-=10
+                                        break
+                                    i+=1
+                            if user_amount1 > 21:
+                                await message.delete()
+                                red = discord.Color.red()
+                                em = discord.Embed(title="Blackjack",description="Bust, Dealer Wins This hand",color=red)
+                                em.add_field(name="Dealer",value = str(dealer))
+                                em.add_field(name=ctx.author.name,value=user1)
+                                current = users_money - bet
+                                await self.bot.db.execute("UPDATE users SET balance=$1 WHERE user_id=$2",current,ctx.author.id)
+                                await ctx.send(embed = em)
+                                break
+                        await message.delete()
+                        green = discord.Color.green()
+                        em = discord.Embed(title="Blackjack",description=ctx.author.name,color= green)
+                        em.add_field(name="Dealer",value = "["+str(dealer[0])+",?]")
+                        em.add_field(name=ctx.author.name,value=user1)
+                        message = await ctx.send(embed = em)
+                    elif play == "?":
+                        hint = self.get_hint(user1,dealer)
+                        await ctx.send(hint)
+                    elif play == "s":
+                        break
+                while user_amount2 < 22:
+                    def check2(message):
+                        return message.author == ctx.author and message.content in ("h","s","?")
+                    try:
+                        play = await self.bot.wait_for('message',check = check2,timeout=60)
+                    except:
+                        return
+                    play = play.clean_content
+                    if play == "h":
+                        card = random.randint(1,13)
+                        if card >= 10:
+                            card = 10
+                        if card == 1:
+                            if user_amount2 + 11 <= 21:
+                                card = 11
+                        user2.append(card)
+                        user_amount2+=card
+                        if user_amount2 > 21:
+                            if 11 in user2:
+                                i = 0
+                                for x in user2:
+                                    if x == 11:
+                                        user2.pop(i)
+                                        user2.append(1)
+                                        user_amount2-=10
+                                        break
+                                    i+=1
+                            if user_amount2 > 21:
+                                await message.delete()
+                                red = discord.Color.red()
+                                em = discord.Embed(title="Blackjack",description="Bust, Dealer Wins This hand",color=red)
+                                em.add_field(name="Dealer",value = str(dealer))
+                                em.add_field(name=ctx.author.name,value=user2)
+                                current = users_money - bet
+                                await self.bot.db.execute("UPDATE users SET balance=$1 WHERE user_id=$2",current,ctx.author.id)
+                                await ctx.send(embed = em)
+                                break
+                        await message.delete()
+                        green = discord.Color.green()
+                        em = discord.Embed(title="Blackjack",description=ctx.author.name,color= green)
+                        em.add_field(name="Dealer",value = "["+str(dealer[0])+",?]")
+                        em.add_field(name=ctx.author.name,value=user2)
+                        message = await ctx.send(embed = em)
+                    elif play == "?":
+                        hint = self.get_hint(user1,dealer)
+                        await ctx.send(hint)
+                    elif play == "s":
+                        break
+                while dealer_amount < 17:
+                    card = random.randint(1,13)
+                    if card >= 10:
+                        card = 10
+                    if card == 1:
+                        if dealer_amount + 11 <= 21:
+                            card == 11
+                    dealer.append(card)
+                    dealer_amount+=card
+                    if dealer_amount > 21:
+                        i = 0
+                        if 11 in dealer:
+                            for x in dealer:
+                                if x == 11:
+                                    dealer.pop(i)
+                                    dealer.append(1)
+                                    dealer_amount-=10
+                                    break
+                                i+=1
+                        if dealer_amount > 21:
+                            await message.delete()
+                            blue = discord.Color.blue()
+                            em = discord.Embed(title="Blackjack",description="Dealer Busted, You Win Both",color=blue)
+                            em.add_field(name="Dealer",value = dealer)
+                            em.add_field(name=ctx.author.name,value=user1 + " - " + user2, inline=False)
+                            current = users_money + bet + bet
+                            await self.bot.db.execute("UPDATE users SET balance=$1 WHERE user_id=$2",current,ctx.author.id)
+                            return await ctx.send(embed = em)
+                    green = discord.Color.green()
+                    em = discord.Embed(title="Blackjack",description=ctx.author.name,color= green)
+                    em.add_field(name="Dealer",value = dealer)
+                    em.add_field(name=ctx.author.name,value=user1 + " - " + user2, inline = False)
+                    message = await ctx.send(embed = em)
+                if dealer_amount > user_amount1:
+                    await message.delete() 
+                    red = discord.Color.red()       
+                    em = discord.Embed(title="Blackjack - Hand One",description="Dealer Wins",color=red)
+                    current = users_money - bet
+                    await self.bot.db.execute("UPDATE users SET balance=$1 WHERE user_id=$2",current,ctx.author.id)
+                elif dealer_amount == user_amount1:
+                    await message.delete()
+                    gold = discord.Color.gold()
+                    em = discord.Embed(title= "Blackjack - Hand One",description = "It's a Draw",color = gold)
+                    current = users_money
+                else:
+                    await message.delete()
+                    blue = discord.Color.blue()
+                    em = discord.Embed(title="Blackjack - Hand One",description="You win!",color=blue)
+                    current = users_money + bet
+                    await self.bot.db.execute("UPDATE users SET balance=$1 WHERE user_id=$2",current,ctx.author.id)
+                em.add_field(name="Dealer",value = dealer)
+                em.add_field(name=ctx.author.name,value=user1)
+                await ctx.send(embed = em)
+                if dealer_amount > user_amount2:
+                    red = discord.Color.red()       
+                    em = discord.Embed(title="Blackjack- Hand Two",description="Dealer Wins",color=red)
+                    current = users_money - bet
+                    await self.bot.db.execute("UPDATE users SET balance=$1 WHERE user_id=$2",current,ctx.author.id)
+                elif dealer_amount == user_amount2:
+                    gold = discord.Color.gold()
+                    em = discord.Embed(title= "Blackjack- Hand Two",description = "It's a Draw",color = gold)
+                    current = users_money
+                else:
+                    blue = discord.Color.blue()
+                    em = discord.Embed(title="Blackjack - Hand Two",description="You win!",color=blue)
+                    current = users_money + bet
+                    await self.bot.db.execute("UPDATE users SET balance=$1 WHERE user_id=$2",current,ctx.author.id)
+                em.add_field(name="Dealer",value = dealer)
+                em.add_field(name=ctx.author.name,value=user2)
+                await ctx.send(embed = em)
+                await ctx.send("Your new balance is $"+str(current)) 
+        if dealer_amount == 21 and user_amount != 21:
             await message.delete()
             red = discord.Color.red()
             em = discord.Embed(title="Blackjack",description="Dealer has blackjack, You Lose",color=red)
@@ -580,7 +817,134 @@ class Games():
         await ctx.send(embed = em)
         await ctx.send("Your new balance is $"+str(current)) 
 
-            
+    def get_hint(self,user,dealer):
+        user_amount = 0
+        for x in user:
+            user_amount+=x
+        top = dealer[0]
+        if user == [11,2] or [11,3] or [11,4] or [11,5]:
+            if top >= 4 and top <=6:
+                hint = "You should Double Down"
+                return hint
+            else:
+                hint = "You should hit"
+                return hint
+        if user == [11,6]:
+            if top >= 2 and top <= 6:
+                hint = "You should Double Down"
+                return hint
+            else:
+                hint = "You should hit"
+                return hint
+        if user == [11,7]:
+            if top == 2 or 7 or 8:
+                hint = "You should stand"
+                return hint
+            elif top >= 3 and top <=6:
+                hint = "You should Double Down"
+                return hint
+            elif top == 9 or 10:
+                hint = "You should hit"
+                return hint
+        if user == [11,8]:
+            if top == 6:
+                hint = "You should Double Down"
+                return hint
+            else:
+                hint = "You should stand"
+                return hint
+        if user == [11,9]:
+            hint = "You should stand"
+            return hint
+        if user == [11,1] or [1,11]:
+            hint == "You should split"
+            return hint
+        if user == [2,2]:
+            if top >=3 and top <=7:
+                hint = "You should split"
+                return hint
+            else:
+                hint = "You should hit"
+        if user == [3,3]:
+            if top >= 4 and top <=7:
+                hint = "You should split"
+            else:
+                hint = "You should hit"
+            return hint
+        if user == [6,6]:
+            if top >= 2 and top <=6:
+                hint = "You should split"
+            else:
+                hint = "You should hit"
+            return hint
+        if user == [7,7]:
+            if top == 10:
+                hint = "You should stand"
+            elif top >= 2 and top <= 7:
+                hint = "You should split"
+            else:
+                hint = "You should hit"
+            return hint
+        if user == [8,8]:
+            hint = "You should split"
+            return hint
+        if user == [9,9]:
+            if top == 7 or 10 or 11:
+                hint = "You should stand"
+            else:
+                hint = "You should split"
+            return hint
+        if user == [10,10]:
+            hint = "You should stand"
+            return hint
+        if user_amount <= 7:
+            hint == "You should hit"
+            return hint
+        if user_amount == 8:
+            if top == 5 or 6:
+                hint = "You should Double Down"
+                return hint
+            else:
+                hint = "You should hit"
+                return hint
+        if user_amount == 9:
+            if top >=2 and top <= 6:
+                hint = "You should Double Down"
+                return hint
+            else:
+                hint = "You should hit"
+                return hint
+        if user_amount == 10:
+            if top >= 2 and top <= 9:
+                hint = "You should Double Down"
+                return hint
+            else:
+                hint = "You should hit"
+                return hint
+        if user_amount == 11:
+            hint = "You should Double Down"
+            return hint
+        if user_amount == 12:
+            if top >=4 and top <=6:
+                hint = "You should stand"
+                return hint
+            else:
+                hint = "You should hit"
+                return hint
+        if user_amount >= 13 and user_amount <= 16:
+            if top >= 2 and top <= 6:
+                hint = "You should stand"
+                return hint
+            else:
+                hint = "You should hit"
+                return hint
+        if user_amount >= 17 and user_amount <= 21:
+            hint = "You should stand"
+            return hint
+        
+        
+
+
     @commands.command(aliases=["lb","top"])
     async def leaderboard(self,ctx):
         data = await self.bot.db.fetch("SELECT user_id,balance FROM users ORDER BY balance DESC;")
