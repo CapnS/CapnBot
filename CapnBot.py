@@ -293,37 +293,6 @@ async def on_message(message):
         return
     if not message.guild:
         return await bot.process_commands(message)
-    try:
-        message_list = []
-        past_two_minutes = datetime.datetime.utcnow()-datetime.timedelta(seconds=120)
-        async for msg in message.channel.history(after=past_two_minutes):
-            if message.author.id == 422181415598161921:
-                pass 
-            elif msg.author.id == message.author.id:
-                message_list.append(msg)
-        if not message.guild.name == "discord.py":
-            user_messages_sent = sum(1 for msg in bot.messages[message.channel] if msg == message.author.id)
-            user_message_content = sum(1 for msg in message_list if msg.content == message.content)
-        else:
-            user_messages_sent = 1
-            user_message_content = 1         
-    except KeyError:
-        user_messages_sent = 1
-        user_message_content = 1
-    if user_messages_sent == 5:
-        try:
-            role = discord.utils.get(message.guild.roles,name="Muted")
-            await message.author.add_roles(role)
-            return await message.channel.send(message.author.mention + " has been muted for spam.")
-        except:
-            return await message.channel.send("Please stop spamming " + message.author.mention)
-    if user_message_content == 10:
-        try:
-            role = discord.utils.get(message.guild.roles,name="Muted")
-            await message.author.add_roles(role)
-            return await message.channel.send(message.author.mention + " has been muted for saying the same thing 10 times in the past two minutes.")
-        except:
-            return await message.channel.send("Please stop saying the same things over and over " + message.author.mention)
     if message.author.id in bot.blacklist:
         return
     await bot.process_commands(message)
@@ -345,33 +314,6 @@ async def on_command(ctx):
     uses+=1
     await bot.db.execute("UPDATE commands SET uses=$1 WHERE command_name=$2;",uses,name)
     bot.counter += 1
-
-
-async def spam_resistance():
-    bot.messages = {}
-    messages = []
-    await bot.wait_until_ready()
-    while not bot.is_closed():
-        past_ten_seconds = datetime.datetime.utcnow()-datetime.timedelta(seconds=10)
-        for guild in bot.guilds:
-            if guild.name == ["discord.py"]:
-                pass
-            else:
-                for channel in guild.channels:
-                    if isinstance(channel, discord.TextChannel):
-                        try:
-                            async for message in channel.history(after=past_ten_seconds):
-                                if not message.author.bot:
-                                    if not message.author.id == 422181415598161921:
-                                        messages.append(message.author.id)
-                            try:
-                                bot.messages[channel]=messages
-                            except KeyError:
-                                bot.messages.update({channel:messages})
-                            messages = []
-                        except:
-                            pass
-        asyncio.sleep(1)
 
 async def webserver():
     await bot.wait_until_ready()
@@ -408,10 +350,9 @@ async def webserver():
                 await user.send(embed=em)
         except :
             pass
-        await asyncio.sleep(5)
+        await asyncio.sleep(60)
 
 
 bot.loop.run_until_complete(set_up_token())
 bot.loop.create_task(webserver())
-bot.loop.create_task(spam_resistance())
 bot.run(TOKEN)

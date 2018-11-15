@@ -169,6 +169,7 @@ class Tags():
 
     @tag.command()
     async def raw(self,ctx,*,name):
+        '''gets raw data from a tag'''
         data = await self.bot.db.fetchrow("SELECT * FROM tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,name)
         if not data:
             return await ctx.send("Tag "+ name + " wasn't found")
@@ -182,6 +183,6 @@ class Tags():
 
         pattern = re.compile('|'.join(transformations.keys()))
         await ctx.send(pattern.sub(replace, content))
-
+    
 def setup(bot):
     bot.add_cog(Tags(bot))
