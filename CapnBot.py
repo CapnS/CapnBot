@@ -315,6 +315,18 @@ async def on_command(ctx):
     await bot.db.execute("UPDATE commands SET uses=$1 WHERE command_name=$2;",uses,name)
     bot.counter += 1
 
+async def update_guild_count():
+    await bot.wait_until_ready()
+    await asyncio.sleep(10)
+    while not bot.is_closed():
+        data = await bot.db.fetchrow("SELECT * FROM keys;")
+        key = data["dbl_key"]
+        auth = {"Authorization": key}
+        server_count = {"server_count":len(bot.guilds)}
+        async with aiohttp.ClientSession(headers=auth) as session:
+            await session.post(f"https://discordbots.org/api/bots/{bot.user.id}/stats", data=server_count)
+        await asyncio.sleep(86400)
+
 async def webserver():
     await bot.wait_until_ready()
     while not bot.is_closed():
@@ -355,4 +367,5 @@ async def webserver():
 
 bot.loop.run_until_complete(set_up_token())
 bot.loop.create_task(webserver())
+bot.loop.create_task(update_guild_count())
 bot.run(TOKEN)

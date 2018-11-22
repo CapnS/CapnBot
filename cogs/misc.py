@@ -217,6 +217,25 @@ class Misc():
                 await message.pin()
 
     @commands.command()
+    async def grammar(self,ctx,*,sentence):
+        replaced = sentence.replace(" ", "%20")
+        data = {"text": replaced, language : "en-US", "enabledOnly"="false"}
+        header = {"Accept":"application/json"}
+        async with aiohttp.ClientSession(headers=header) as session:
+            async with session.get("https://languagetool.org/api/v2/check",data=data) as resp:
+                j = await resp.json()
+                print(j)
+        '''
+        red = discord.Color.red()
+        em = discord.Embed(title="Grammar Checker",description = str(len(matches)) + "error(s)", color = red)
+        em.add_field(name = "Before",value = "```" + sentence + "```",inline=False)
+        em.add_field(name = "After", value = "```" + correction + "```",inline=False)
+        em.set_footer(text="Requested by "+ ctx.author.mention)
+        await ctx.send(embed=em)
+        '''
+
+        
+    @commands.command()
     async def text(self, ctx,*, message):
         'Texts Me'
         if not ctx.author.id == 422181415598161921:

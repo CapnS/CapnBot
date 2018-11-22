@@ -80,7 +80,7 @@ class BotInfo():
             repo = git.Repo(r"/home/zachary/CapnBot.git")
         print(dir_path)
         commit = repo.head.commit.message    
-        em = discord.Embed(title = "Bot Info", description = f"[Bot Invite](https://discordapp.com/oauth2/authorize?&client_id={self.bot.user.id}&scope=bot&permissions=8) | [Support Server](https://discord.gg/MJV4qsV) | [Source Code](https://github.com/CapnS/CapnBot) | [Patreon](https://www.patreon.com/capn)")
+        em = discord.Embed(title = "Bot Info", description = f"[Bot Invite](https://discordapp.com/oauth2/authorize?&client_id={self.bot.user.id}&scope=bot&permissions=8) | [Support Server](https://discord.gg/MJV4qsV) | [Source Code](https://github.com/CapnS/CapnBot) | [Patreon](https://www.patreon.com/capn) | [DBL](https://discordbots.org/bot/448915931507458048)")
         em.color = discord.Color.gold()
         em.add_field(name='Guilds', value=str(len(all_guilds)))
         em.add_field(name = "Users", value = str(total_members))
