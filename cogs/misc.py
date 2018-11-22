@@ -228,10 +228,10 @@ class Misc():
             return matches, correction
         matches, correction = await self.bot.loop.run_in_executor(None,go)
         red = discord.Color.red()
-        em = discord.Embed(title="Grammar Checker",description = str(len(matches)) + "error(s)", color = red)
+        em = discord.Embed(title="Grammar Checker",description = str(len(matches)) + " error(s)", color = red)
         em.add_field(name = "Before",value = "```" + sentence + "```",inline=False)
         em.add_field(name = "After", value = "```" + correction + "```",inline=False)
-        em.set_footer(text="Requested by "+ ctx.author.mention)
+        em.set_footer(text="Requested by "+ ctx.author)
         await ctx.send(embed=em)
 
 
