@@ -225,8 +225,8 @@ class Misc():
         def go():
             matches = self.g.check(sentence)
             correction = lc.correct(sentence,matches)
-            return correction
-        correction = await self.bot.loop.run_in_executor(None,go)
+            return matches, correction
+        matches, correction = await self.bot.loop.run_in_executor(None,go)
         red = discord.Color.red()
         em = discord.Embed(title="Grammar Checker",description = str(len(matches)) + "error(s)", color = red)
         em.add_field(name = "Before",value = "```" + sentence + "```",inline=False)
