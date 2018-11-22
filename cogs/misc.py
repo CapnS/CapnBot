@@ -231,7 +231,7 @@ class Misc():
         em = discord.Embed(title="Grammar Checker",description = str(len(matches)) + " error(s)", color = red)
         em.add_field(name = "Before",value = "```" + sentence + "```",inline=False)
         em.add_field(name = "After", value = "```" + correction + "```",inline=False)
-        em.set_footer(text="Requested by "+ ctx.author)
+        em.set_footer(text="Requested by "+ str(ctx.author))
         await ctx.send(embed=em)
 
 
