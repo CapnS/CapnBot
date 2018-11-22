@@ -11,6 +11,9 @@ import traceback
 from contextlib import redirect_stdout
 import time
 import aiohttp
+import language_check as lc
+
+
 
 class Plural:
     def __init__(self, **attr):
@@ -80,6 +83,7 @@ class Misc():
     def __init__(self, bot):
         self.bot = bot
         self._last_result = None
+        self.g = lc.LanguageTool("en-US")
 
     def cleanup_code(self, content):
         """Automatically removes code blocks from the code."""
@@ -218,21 +222,18 @@ class Misc():
 
     @commands.command()
     async def grammar(self,ctx,*,sentence):
-        replaced = sentence.replace(" ", "%20")
-        data = {"text": replaced, language : "en-US", "enabledOnly"="false"}
-        header = {"Accept":"application/json"}
-        async with aiohttp.ClientSession(headers=header) as session:
-            async with session.get("https://languagetool.org/api/v2/check",data=data) as resp:
-                j = await resp.json()
-                print(j)
-        '''
+        def go():
+            matches = self.g.check(sentence)
+            correction = lc.correct(sentence,matches)
+            return correction
+        correction = await self.bot.loop.run_in_executor(None,go)
         red = discord.Color.red()
         em = discord.Embed(title="Grammar Checker",description = str(len(matches)) + "error(s)", color = red)
         em.add_field(name = "Before",value = "```" + sentence + "```",inline=False)
         em.add_field(name = "After", value = "```" + correction + "```",inline=False)
         em.set_footer(text="Requested by "+ ctx.author.mention)
         await ctx.send(embed=em)
-        '''
+
 
         
     @commands.command()
