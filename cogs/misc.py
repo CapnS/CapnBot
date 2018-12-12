@@ -220,6 +220,7 @@ class Misc():
             async for message in ctx.channel.history(limit=1):
                 await message.pin()
 
+    '''
     @commands.command()
     async def grammar(self,ctx,*,sentence):
         def go():
@@ -233,7 +234,7 @@ class Misc():
         em.add_field(name = "After", value = "```" + correction + "```",inline=False)
         em.set_footer(text="Requested by "+ str(ctx.author))
         await ctx.send(embed=em)
-
+    '''
 
     @commands.command(aliases = ["ss"])
     async def screenshot(self, ctx, website):
