@@ -12,7 +12,7 @@ from contextlib import redirect_stdout
 import time
 import aiohttp
 import language_check as lc
-
+from selenium import webdriver
 
 
 class Plural:
@@ -235,12 +235,30 @@ class Misc():
         await ctx.send(embed=em)
 
 
+    @commands.command(aliases = ["ss"])
+    async def screenshot(self, ctx, website):
+        def snap():
+            DRIVER = 'chromedriver'
+            driver = webdriver.Chrome(DRIVER)
+            driver.get('https://www.spotify.com')
+            screenshot = driver.save_screenshot('screenshot.png')
+            driver.quit()
+            f = discord.File("screenshot.png", filename="screenshot.png")
+            return f
+        t1 = time.perf_counter()
+        f = await self.bot.loop.run_in_executor(None,snap)
+        t2 = time.perf_counter()
+        t = round((t2-t1),2)
+        gold = discord.Color.gold()
+        em = discord.Embed(title = "Screenshot", description="Took "+ str(t) + " Seconds",color = gold)
+        em.set_image(url= "attachment://screenshot.png")
+        em.set_footer(text="Requested by "+ ctx.author.name, icon_url=ctx.author.avatar_url)
+        await ctx.send(file = f, embed = em)
         
     @commands.command()
     async def text(self, ctx,*, message):
         'Texts Me'
-        if not ctx.author.id == 422181415598161921:
-            return
+        message = message + " - " + str(ctx.author)
         data = await self.bot.db.fetchrow("SELECT * FROM keys;")
         account_sid=data["sid"]
         auth_token=data["twilio_token"]
