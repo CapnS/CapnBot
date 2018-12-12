@@ -13,7 +13,7 @@ import time
 import aiohttp
 #import language_check as lc
 from selenium import webdriver
-
+from pyvirtualdisplay import Display
 
 class Plural:
     def __init__(self, **attr):
@@ -239,6 +239,8 @@ class Misc():
     @commands.command(aliases = ["ss"])
     async def screenshot(self, ctx, website):
         def snap():
+            display = Display(visible=0, size=(800, 600))
+            display.start()
             options = webdriver.ChromeOptions()
             options.add_argument('--no-sandbox')
             driver = webdriver.Chrome(chrome_options=options)
