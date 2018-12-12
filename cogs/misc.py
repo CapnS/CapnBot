@@ -247,7 +247,7 @@ class Misc():
             try:
                 driver.get(website)
             except:
-                return await ctx.send("Invalid URL")
+                return False
             screenshot = driver.save_screenshot('screenshot.png')
             driver.quit()
             f = discord.File("screenshot.png", filename="screenshot.png")
@@ -256,6 +256,8 @@ class Misc():
         f = await self.bot.loop.run_in_executor(None,snap)
         t2 = time.perf_counter()
         t = round((t2-t1),2)
+        if f == False:
+            return await ctx.send("Invalid URL")
         gold = discord.Color.gold()
         em = discord.Embed(title = "Screenshot", description="Took "+ str(t) + " Seconds",color = gold)
         em.set_image(url= "attachment://screenshot.png")
