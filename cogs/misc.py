@@ -11,7 +11,7 @@ import traceback
 from contextlib import redirect_stdout
 import time
 import aiohttp
-import language_check as lc
+#import language_check as lc
 from selenium import webdriver
 
 
@@ -83,7 +83,7 @@ class Misc():
     def __init__(self, bot):
         self.bot = bot
         self._last_result = None
-        self.g = lc.LanguageTool("en-US")
+        #self.g = lc.LanguageTool("en-US")
 
     def cleanup_code(self, content):
         """Automatically removes code blocks from the code."""
