@@ -239,8 +239,9 @@ class Misc():
     @commands.command(aliases = ["ss"])
     async def screenshot(self, ctx, website):
         def snap():
-            DRIVER = 'chromedriver'
-            driver = webdriver.Chrome(DRIVER)
+            options = webdriver.ChromeOptions()
+            options.add_argument('--no-sandbox')
+            driver = webdriver.Chrome(chrome_options=options)
             driver.get('https://www.spotify.com')
             screenshot = driver.save_screenshot('screenshot.png')
             driver.quit()
