@@ -244,7 +244,10 @@ class Misc():
             options = webdriver.ChromeOptions()
             options.add_argument('--no-sandbox')
             driver = webdriver.Chrome(chrome_options=options)
-            driver.get(website)
+            try:
+                driver.get(website)
+            except:
+                return await ctx.send("Invalid URL")
             screenshot = driver.save_screenshot('screenshot.png')
             driver.quit()
             f = discord.File("screenshot.png", filename="screenshot.png")
