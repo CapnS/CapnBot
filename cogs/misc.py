@@ -239,7 +239,7 @@ class Misc():
     @commands.command(aliases = ["ss"])
     async def screenshot(self, ctx, website):
         def snap():
-            DRIVER = '~/CapnBot/.venv/bin/chromedriver'
+            DRIVER = 'chromedriver'
             driver = webdriver.Chrome(DRIVER)
             driver.get('https://www.spotify.com')
             screenshot = driver.save_screenshot('screenshot.png')
