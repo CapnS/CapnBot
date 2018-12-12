@@ -244,7 +244,7 @@ class Misc():
             options = webdriver.ChromeOptions()
             options.add_argument('--no-sandbox')
             driver = webdriver.Chrome(chrome_options=options)
-            driver.get('https://www.spotify.com')
+            driver.get(website)
             screenshot = driver.save_screenshot('screenshot.png')
             driver.quit()
             f = discord.File("screenshot.png", filename="screenshot.png")
