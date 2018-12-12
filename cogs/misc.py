@@ -239,7 +239,7 @@ class Misc():
     @commands.command(aliases = ["ss"])
     async def screenshot(self, ctx, website):
         def snap():
-            display = Display(visible=0, size=(800, 600))
+            display = Display(visible=0, size=(1920, 1080))
             display.start()
             options = webdriver.ChromeOptions()
             options.add_argument('--no-sandbox')
