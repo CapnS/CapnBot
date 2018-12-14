@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+import aiohttp
 
 class CapnChat():
     def __init__(self,bot):
@@ -12,8 +13,9 @@ class CapnChat():
         if not (3 <= len(statement) <= 60):
             return await ctx.send("Text must be longer than 3 chars and shorter than 60.")
         payload = {"text": statement}
-        async with ctx.channel.typing(), ctx.bot.session.post("https://public-api.travitia.xyz/talk", json=payload, headers={"authorization": key}) as req:
-            await ctx.send((await req.json())["response"])
+        async with ctx.channel.typing(), aiohttp.ClientSession as session:
+            async with session.post("https://public-api.travitia.xyz/talk", json=payload, headers={"authorization": key}) as req:
+                await ctx.send((await req.json())["response"])
 
 
 
