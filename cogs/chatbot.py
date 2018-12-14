@@ -1,11 +1,5 @@
-from chatterbot import ChatBot
-from chatterbot.trainers import ChatterBotCorpusTrainer
 import discord
 from discord.ext import commands
-
-chatterbot = ChatBot("CapnBot")
-chatterbot.set_trainer(ChatterBotCorpusTrainer)
-
 
 class CapnChat():
     def __init__(self,bot):
@@ -13,9 +7,13 @@ class CapnChat():
 
     @commands.command()
     async def cb(self,ctx,*,statement):
-        '''Chatbot, input message and get response'''
-        response = chatterbot.get_response(statement)
-        await ctx.send(response)
+        data = await db.fetchrow("SELECT * FROM keys;")
+        key = data["travitia"]
+        if not (3 <= len(statement) <= 60):
+            return await ctx.send("Text must be longer than 3 chars and shorter than 60.")
+        payload = {"text": statement}
+        async with ctx.channel.typing(), ctx.bot.session.post("https://public-api.travitia.xyz/talk", json=payload, headers={"authorization": key}) as req:
+            await ctx.send((await req.json())["response"])
 
 
 
