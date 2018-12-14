@@ -7,7 +7,7 @@ class CapnChat():
 
     @commands.command()
     async def cb(self,ctx,*,statement):
-        data = await db.fetchrow("SELECT * FROM keys;")
+        data = await self.bot.db.fetchrow("SELECT * FROM keys;")
         key = data["travitia"]
         if not (3 <= len(statement) <= 60):
             return await ctx.send("Text must be longer than 3 chars and shorter than 60.")
