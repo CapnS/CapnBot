@@ -236,34 +236,6 @@ class Misc():
         await ctx.send(embed=em)
     '''
 
-    @commands.command(aliases = ["ss"])
-    async def screenshot(self, ctx, website):
-        def snap():
-            display = Display(visible=0, size=(1920, 1080))
-            display.start()
-            options = webdriver.ChromeOptions()
-            options.add_argument('--no-sandbox')
-            driver = webdriver.Chrome(chrome_options=options)
-            try:
-                driver.get(website)
-            except:
-                return False
-            screenshot = driver.save_screenshot('screenshot.png')
-            driver.quit()
-            f = discord.File("screenshot.png", filename="screenshot.png")
-            return f
-        t1 = time.perf_counter()
-        f = await self.bot.loop.run_in_executor(None,snap)
-        t2 = time.perf_counter()
-        t = round((t2-t1),2)
-        if f == False:
-            return await ctx.send("Invalid URL")
-        gold = discord.Color.gold()
-        em = discord.Embed(title = "Screenshot", description="Took "+ str(t) + " Seconds",color = gold)
-        em.set_image(url= "attachment://screenshot.png")
-        em.set_footer(text="Requested by "+ ctx.author.name, icon_url=ctx.author.avatar_url)
-        await ctx.send(file = f, embed = em)
-        
     @commands.command()
     async def text(self, ctx,*, message):
         'Texts Me'

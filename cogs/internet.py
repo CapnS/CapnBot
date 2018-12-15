@@ -141,6 +141,21 @@ class Internet():
         em.add_field(name="Cloud Cover",value = f'{clouds}% cloudy')
         await ctx.send(embed=em)
 
+    @commands.command(["ss","snap"])
+    async def screenshot(self,ctx,website):
+        headers = {"website": website}
+        async with aiohttp.ClientSession(headers = headers) as ses:
+            async with ses.post("https://webscreener.herokuapp.com/api/v1") as r:
+                j = await r.json()
+                try:
+                    snap = j["snapshot"]
+                except:
+                    return await ctx.send("Invalid URL")
+        e = discord.Embed(title = "Screenshot",url=website, description=website)
+        e.set_image(url=snap)
+        e.set_footer(text="Requested by "+ ctx.author.name, icon_url=ctx.author.avatar_url)
+        await ctx.send(embed=e)
+
     @commands.group(invoke_without_command=True)
     async def ud(self, ctx):
         '-> Searches UD'
