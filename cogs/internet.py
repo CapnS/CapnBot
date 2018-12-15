@@ -11,6 +11,7 @@ import sys
 import asyncurban
 import aiogoogletrans
 import asyncio
+import time
 
 c = CurrencyRates()
 b = BtcConverter()
@@ -144,6 +145,7 @@ class Internet():
     @commands.command(aliases=["ss","snap"])
     async def screenshot(self,ctx,website):
         headers = {"website": website}
+        t1 = time.perf_counter()
         async with aiohttp.ClientSession() as ses:
             async with ses.post("https://webscreener.herokuapp.com/api/v1",headers = headers) as r:
                 j = await r.json()
@@ -151,7 +153,9 @@ class Internet():
                     snap = j["snapshot"]
                 except:
                     return await ctx.send("Invalid URL")
-        e = discord.Embed(title = "Screenshot",url=j["website"], description=website)
+        t2 = time.perf_counter()
+        t = round((t2-t1),2)
+        e = discord.Embed(title = "Screenshot",url=j["website"], description="Took "+str(t)+ " seconds")
         e.set_image(url=snap)
         e.set_footer(text="Requested by "+ ctx.author.name, icon_url=ctx.author.avatar_url)
         await ctx.send(embed=e)
