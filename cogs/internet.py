@@ -144,14 +144,14 @@ class Internet():
     @commands.command(aliases=["ss","snap"])
     async def screenshot(self,ctx,website):
         headers = {"website": website}
-        async with aiohttp.ClientSession(headers = headers) as ses:
-            async with ses.post("https://webscreener.herokuapp.com/api/v1") as r:
+        async with aiohttp.ClientSession() as ses:
+            async with ses.post("https://webscreener.herokuapp.com/api/v1",headers = headers) as r:
                 j = await r.json()
                 try:
                     snap = j["snapshot"]
                 except:
                     return await ctx.send("Invalid URL")
-        e = discord.Embed(title = "Screenshot",url=website, description=website)
+        e = discord.Embed(title = "Screenshot",url=j["website"], description=website)
         e.set_image(url=snap)
         e.set_footer(text="Requested by "+ ctx.author.name, icon_url=ctx.author.avatar_url)
         await ctx.send(embed=e)
