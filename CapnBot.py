@@ -76,7 +76,7 @@ except:
                 if err:
                     return [f"```fix\n{code}``` ```fix\n-- stdout --\n\n{out.decode()}``` ```fix\n-- stderr --\n\n{err.decode()}```", out.decode(), err.decode()]
                 else:
-                    return [f"```fix\n{code}``` ```fix\n-- stdout --\n\n{out.decode()}", out.decode(), err.decode()]
+                    return [f"```fix\n{code}``` ```fix\n-- stdout --\n\n{out.decode()}```", out.decode(), err.decode()]
         result = await bot.loop.run_in_executor(None, runshell, code)
         try:
             await ctx.send(result[0])
