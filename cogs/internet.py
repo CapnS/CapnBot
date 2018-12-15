@@ -141,7 +141,7 @@ class Internet():
         em.add_field(name="Cloud Cover",value = f'{clouds}% cloudy')
         await ctx.send(embed=em)
 
-    @commands.command(["ss","snap"])
+    @commands.command(aliases=["ss","snap"])
     async def screenshot(self,ctx,website):
         headers = {"website": website}
         async with aiohttp.ClientSession(headers = headers) as ses:
