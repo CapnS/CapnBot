@@ -147,7 +147,7 @@ class Internet():
         headers = {"website": website}
         t1 = time.perf_counter()
         async with aiohttp.ClientSession() as ses:
-            async with ses.post("https://webscreener.herokuapp.com/api/v1",headers = headers) as r:
+            async with ses.post("https://magmachain.herokuapp.com/api/v1",headers = headers) as r:
                 j = await r.json()
                 try:
                     snap = j["snapshot"]
