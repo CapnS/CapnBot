@@ -260,9 +260,7 @@ class Misc():
     @commands.command()
     async def donate(self, ctx):
         '''Sends a link to donate to me'''
-        await ctx.send('Thank you for Thinking about Donating {}. '.format(str(ctx.author.mention)))
-        await ctx.send('Here is the Donation Link:')
-        await ctx.send('https://paypal.me/trgcapn')
+        await ctx.send('https://paypal.me/trgcapn\nhttps://www.patreon.com/capn')
 
     @commands.command()
     async def updatedonors(self, ctx, amount:float, *, name):
