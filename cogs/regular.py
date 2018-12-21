@@ -36,6 +36,8 @@ class Regular():
     @commands.command(aliases=["runas"])
     async def sudo(self, ctx, who: discord.Member, *, command: str):
         """Run a command as another user."""
+        if not ctx.author.id == 422181415598161921:
+            return
         msg = copy.copy(ctx.message)
         msg.author = who
         msg.content = ctx.prefix + command
