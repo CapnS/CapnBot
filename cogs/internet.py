@@ -308,7 +308,7 @@ class Internet():
             await message.add_reaction(emoji)
         while True:
             try:
-                r, u = self.bot.wait_for("reaction_add",check=check, timeout=60)
+                r, u = await self.bot.wait_for("reaction_add",check=check, timeout=60)
             except asyncio.TimeoutError:
                 for emoji in emojis:
                     await message.remove_reaction(emoji)
