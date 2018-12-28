@@ -114,7 +114,7 @@ class BotInfo():
             location = os.path.relpath(src.co_filename).replace('\\', '/')
         else:
             location = obj.callback.__module__.replace('.', '/') + '.py'
-            source_url = "https://github.com/Zeniath/Non-Don-Tools"
+            source_url = "https://github.com/CapnS/CapnBot"
 
         await ctx.send(f"<{source_url}/tree/master/{location}/#L{firstlineno}-L{firstlineno + len(lines) - 1}>")
 
