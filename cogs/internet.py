@@ -275,8 +275,8 @@ class Internet():
             return print("No Recipes Found")
         recipe = t['hits'][0]["recipe"]
         name = recipe['label']
-        time = str(int(recipe['totalTime']))
-        servings = str(int(recipe['yield']))
+        time = str(int(recipe['totalTime'])) + " minutes"
+        servings = str(int(recipe['yield'])) + " servings"
         url = recipe['shareAs']
         ingredients = "- " + "\n- ".join(recipe['ingredientLines'])
         diets = ", ".join(recipe['dietLabels'])
@@ -298,7 +298,7 @@ class Internet():
         nutrition.add_field(name="Health and Diet",value=d)
         nutrition.add_field(name="Calories", value=calories)
         nutrition.add_field(name="Contains", value = n)
-        emojis = ("◀️","▶️","⏹")
+        emojis = ("\U000025c0","\U000025b6","\U000023f9")
         def check(reaction,user):
             return user == ctx.author and str(reaction.emoji) in emojis
         x = 0
@@ -314,7 +314,7 @@ class Internet():
                     await message.remove_reaction(emoji)
                 return
             else:
-                if str(r.emoji) == "⏹":
+                if str(r.emoji) == "\U000023f9":
                     return await message.delete()
                 else:
                     if x == 0:
