@@ -297,7 +297,7 @@ class Internet():
         nutrition = discord.Embed(title = name, description="Nutrition Facts",url=url,color=green)
         nutrition.add_field(name="Health and Diet",value=d)
         nutrition.add_field(name="Calories", value=calories)
-        nutrition.add_field(name="Contains", value = n)
+        nutrition.add_field(name="Contains", value = n, inline = False)
         emojis = ("\U000025c0","\U000025b6","\U000023f9")
         def check(reaction,user):
             return user == ctx.author and str(reaction.emoji) in emojis
