@@ -263,7 +263,7 @@ class Internet():
                 await ctx.send(text)
 
     @commands.command
-    async def get_recipe(ctx, *, search):
+    async def recipe(self, ctx, *, search):
         data = await self.bot.db.fetch("SELECT * FROM keys")
         app_id = data['recipe_id']
         app_key = data['recipe_key']
