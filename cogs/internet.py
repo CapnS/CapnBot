@@ -264,7 +264,7 @@ class Internet():
 
     @commands.command()
     async def recipe(self, ctx, *, search):
-        data = await self.bot.db.fetch("SELECT * FROM keys")
+        data = await self.bot.db.fetchrow("SELECT * FROM keys")
         app_id = data['recipe_id']
         app_key = data['recipe_key']
         async with aiohttp.ClientSession() as ses:
