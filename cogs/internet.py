@@ -322,7 +322,7 @@ class Internet():
                     else: 
                         x = 0
                 em = embeds[x]
-                message = await message.edit(embed = em)               
+                await message.edit(embed = em)               
                 
 
 def setup(bot):
