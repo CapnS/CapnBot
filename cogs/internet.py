@@ -311,9 +311,13 @@ class Internet():
                 r, u = await self.bot.wait_for("reaction_add",check=check, timeout=60)
             except asyncio.TimeoutError:
                 for emoji in emojis:
-                    await message.remove_reaction(emoji)
+                    await message.remove_reaction(emoji, ctx.me)
                 return
             else:
+                try:
+                    await message.remove_reaction(r,u)
+                except:
+                    pass
                 if str(r.emoji) == "\U000023f9":
                     return await message.delete()
                 else:
