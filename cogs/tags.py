@@ -42,7 +42,7 @@ class Tags():
                 full_match = match.group(1)
                 print(full_match)
                 return full_match
-            new_str = self.bot.loop.run_in_executor(None,re.sub(regex, tag_r, content, re.MULTILINE))
+            new_str = re.sub(regex, tag_r, content, re.MULTILINE)
             return await ctx.send(new_str)
         data = await self.bot.db.fetch("SELECT * FROM tags WHERE server_id=$1 AND name % $2 ORDER BY similarity(name,$2) DESC LIMIT 3;",ctx.guild.id,search)
         msg = ""
