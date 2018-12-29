@@ -46,7 +46,7 @@ class Tags():
                     if returned.json()["status"] != "running":
                         return "Error"
                     else:
-                        status_id = returned.json["id"]
+                        status_id = returned.json()["id"]
                     finished = False
                     while not finished:
                         r = requests.post("http://api.paiza.io:80/runners/get_status?id="+status_id+"&api_key=guest")
