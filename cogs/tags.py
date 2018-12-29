@@ -21,7 +21,7 @@ class Tags():
             await self.bot.db.execute("UPDATE tags SET uses=$1 WHERE server_id=$2 AND name = $3;",uses,ctx.guild.id,search)
             content = data["content"]
             def replace():
-                regex = r"{(?:ctx\.([\w\.]+))}+"
+                regex = r"<(?:ctx\.([\w\.]+))>+"
                 def tag_replace(match):
                     full_match = match.group(0)
                     result = match.group(1)
@@ -39,7 +39,7 @@ class Tags():
                     finally:
                         return str(subject)
                 new_str = re.sub(regex, tag_replace, content, re.MULTILINE)
-                regex = r"\[(.*?)\]"
+                regex = r"\~(.*?)\~"
                 def tag_r(match):
                     full_match = match.group(1)
                     full_match = full_match.replace(" ", "%20")
