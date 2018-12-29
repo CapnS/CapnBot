@@ -37,7 +37,7 @@ class Tags():
                 finally:
                     return str(subject)
             new_str = re.sub(regex, tag_replace, content, re.MULTILINE)
-            regex = r"<(?))>+"
+            regex = r"\<(.*?)\>"
             def tag_r(match):
                 full_match = match.group(1)
                 print(full_match)
