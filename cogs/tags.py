@@ -20,31 +20,43 @@ class Tags():
             uses = data["uses"]+1
             await self.bot.db.execute("UPDATE tags SET uses=$1 WHERE server_id=$2 AND name = $3;",uses,ctx.guild.id,search)
             content = data["content"]
-            regex = r"{(?:ctx\.([\w\.]+))}+"
-            def tag_replace(match):
-                full_match = match.group(0)
-                result = match.group(1)
-                subject = ctx
-                attrs = result.split('.')
-                if attrs[0] not in ['author', 'channel','message']:
+            def replace():
+                regex = r"{(?:ctx\.([\w\.]+))}+"
+                def tag_replace(match):
+                    full_match = match.group(0)
+                    result = match.group(1)
+                    subject = ctx
+                    attrs = result.split('.')
+                    if attrs[0] not in ['author', 'channel','message']:
+                        return full_match
+                    try:
+                        for attr in attrs:
+                            if attr.startswith('_'):
+                                return full_match
+                            subject = getattr(subject, attr)
+                    except AttributeError:
+                        return full_match
+                    finally:
+                        return str(subject)
+                new_str = re.sub(regex, tag_replace, content, re.MULTILINE)
+                regex = r"\<(.*?)\>"
+                def tag_r(match):
+                    full_match = match.group(1)
+                    returned = requests.post("http://api.paiza.io:80/runners/create?source_code="+full_match+"&language=python3&api_key=guest")
+                    if returned.json()["status"] != "running":
+                        return "Error"
+                    else:
+                        status_id = returned.json["id"]
+                    finished = False
+                    while not finished:
+                        r = requests.post("http://api.paiza.io:80/runners/get_status?id="+status_id+"&api_key=guest")
+                        finished = r.json()["status"] == "completed"
+                    resp = requests.post("http://api.paiza.io:80/runners/get_details?id="+status_id+"&api_key=guest")
+                    full_match = resp.json()["stdout"] if not resp.json()["stderr"] else resp.json()["stderr"]
                     return full_match
-                try:
-                    for attr in attrs:
-                        if attr.startswith('_'):
-                            return full_match
-                        subject = getattr(subject, attr)
-                except AttributeError:
-                    return full_match
-                finally:
-                    return str(subject)
-            new_str = re.sub(regex, tag_replace, content, re.MULTILINE)
-            regex = r"\<(.*?)\>"
-            def tag_r(match):
-                full_match = match.group(1)
-                returned = requests.post("http://coliru.stacked-crooked.com/compile", data = json.dumps({"cmd": "python3 main.cpp", "src": full_match}))
-                full_match = "Error" if returned.text.startswith("765") else returned.text
-                return full_match
-            new_str = re.sub(regex, tag_r, content, re.MULTILINE)
+                new_str = re.sub(regex, tag_r, content, re.MULTILINE)
+                return new_str
+            new_str = await self.bot.loop.run_in_executor(None,replace)
             return await ctx.send(new_str)
         data = await self.bot.db.fetch("SELECT * FROM tags WHERE server_id=$1 AND name % $2 ORDER BY similarity(name,$2) DESC LIMIT 3;",ctx.guild.id,search)
         msg = ""
