@@ -21,24 +21,6 @@ class Tags():
             await self.bot.db.execute("UPDATE tags SET uses=$1 WHERE server_id=$2 AND name = $3;",uses,ctx.guild.id,search)
             content = data["content"]
             def replace():
-                regex = r"\<(.*?)\>"
-                def tag_r(match):
-                    full_match = match.group(1)
-                    full_match = full_match.replace(" ", "%20")
-                    full_match = full_match.replace(";","%3B")
-                    returned = requests.post("http://api.paiza.io:80/runners/create?source_code="+full_match+"&language=python3&api_key=guest")
-                    if returned.json()["status"] != "running":
-                        return "Error"
-                    else:
-                        status_id = returned.json()["id"]
-                    finished = False
-                    while not finished:
-                        r = requests.get("http://api.paiza.io:80/runners/get_status?id="+status_id+"&api_key=guest")
-                        finished = r.json()["status"] == "completed"
-                    resp = requests.get("http://api.paiza.io:80/runners/get_details?id="+status_id+"&api_key=guest")
-                    full_match = resp.json()["stdout"].strip("\n") if resp.json()["stderr"] == "" else resp.json()["stderr"]
-                    return full_match
-                new_str = re.sub(regex, tag_r, content, re.MULTILINE)
                 regex = r"{(?:ctx\.([\w\.]+))}+"
                 def tag_replace(match):
                     full_match = match.group(0)
@@ -56,7 +38,25 @@ class Tags():
                         return full_match
                     finally:
                         return str(subject)
-                new_str = re.sub(regex, tag_replace, new_str, re.MULTILINE)
+                new_str = re.sub(regex, tag_replace, content, re.MULTILINE)
+                regex = r"\[(.*?)\]"
+                def tag_r(match):
+                    full_match = match.group(1)
+                    full_match = full_match.replace(" ", "%20")
+                    full_match = full_match.replace(";","%3B")
+                    returned = requests.post("http://api.paiza.io:80/runners/create?source_code="+full_match+"&language=python3&api_key=guest")
+                    if returned.json()["status"] != "running":
+                        return "Error"
+                    else:
+                        status_id = returned.json()["id"]
+                    finished = False
+                    while not finished:
+                        r = requests.get("http://api.paiza.io:80/runners/get_status?id="+status_id+"&api_key=guest")
+                        finished = r.json()["status"] == "completed"
+                    resp = requests.get("http://api.paiza.io:80/runners/get_details?id="+status_id+"&api_key=guest")
+                    full_match = resp.json()["stdout"].strip("\n") if resp.json()["stderr"] == "" else resp.json()["stderr"]
+                    return full_match
+                new_str = re.sub(regex, tag_r, new_str, re.MULTILINE)
                 return new_str
             new_str = await self.bot.loop.run_in_executor(None,replace)
             return await ctx.send(new_str)
