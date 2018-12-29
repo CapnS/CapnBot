@@ -42,6 +42,8 @@ class Tags():
                 regex = r"\<(.*?)\>"
                 def tag_r(match):
                     full_match = match.group(1)
+                    full_match = full_match.replace(" ", "%20")
+                    full_match = full_match.replace(";","%3B")
                     returned = requests.post("http://api.paiza.io:80/runners/create?source_code="+full_match+"&language=python3&api_key=guest")
                     if returned.json()["status"] != "running":
                         return "Error"
