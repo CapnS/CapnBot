@@ -40,7 +40,7 @@ class Tags():
             regex = r"\<(.*?)\>"
             def tag_r(match):
                 full_match = match.group(1)
-                returned = requests.post("http://coliru.stacked-crooked.com/compile", data = {"cmd": "python3 main.cpp", "src": full_match)
+                returned = requests.post("http://coliru.stacked-crooked.com/compile", data = {"cmd": "python3 main.cpp", "src": full_match})
                 full_match = returned.text
                 return full_match
             new_str = re.sub(regex, tag_r, content, re.MULTILINE)
