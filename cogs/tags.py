@@ -56,7 +56,7 @@ class Tags():
                     resp = requests.get("http://api.paiza.io:80/runners/get_details?id="+status_id+"&api_key=guest")
                     full_match = resp.json()["stdout"].strip("\n") if resp.json()["stderr"] == "" else resp.json()["stderr"]
                     return full_match
-                new_str = re.sub(regex, tag_r, content, re.MULTILINE)
+                new_str = re.sub(regex, tag_r, new_str, re.MULTILINE)
                 return new_str
             new_str = await self.bot.loop.run_in_executor(None,replace)
             return await ctx.send(new_str)
