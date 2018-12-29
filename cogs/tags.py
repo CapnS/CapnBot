@@ -52,7 +52,7 @@ class Tags():
                         r = requests.get("http://api.paiza.io:80/runners/get_status?id="+status_id+"&api_key=guest")
                         finished = r.json()["status"] == "completed"
                     resp = requests.get("http://api.paiza.io:80/runners/get_details?id="+status_id+"&api_key=guest")
-                    full_match = resp.json()["stdout"] if not resp.json()["stderr"] else resp.json()["stderr"]
+                    full_match = resp.json()["stdout"] if resp.json()["stderr"] == "" else resp.json()["stderr"]
                     return full_match
                 new_str = re.sub(regex, tag_r, content, re.MULTILINE)
                 return new_str
