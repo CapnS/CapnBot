@@ -49,9 +49,9 @@ class Tags():
                         status_id = returned.json()["id"]
                     finished = False
                     while not finished:
-                        r = requests.post("http://api.paiza.io:80/runners/get_status?id="+status_id+"&api_key=guest")
+                        r = requests.get("http://api.paiza.io:80/runners/get_status?id="+status_id+"&api_key=guest")
                         finished = r.json()["status"] == "completed"
-                    resp = requests.post("http://api.paiza.io:80/runners/get_details?id="+status_id+"&api_key=guest")
+                    resp = requests.get("http://api.paiza.io:80/runners/get_details?id="+status_id+"&api_key=guest")
                     full_match = resp.json()["stdout"] if not resp.json()["stderr"] else resp.json()["stderr"]
                     return full_match
                 new_str = re.sub(regex, tag_r, content, re.MULTILINE)
