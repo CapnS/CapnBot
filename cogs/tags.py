@@ -21,7 +21,6 @@ class Tags():
             await self.bot.db.execute("UPDATE tags SET uses=$1 WHERE server_id=$2 AND name = $3;",uses,ctx.guild.id,search)
             content = data["content"]
             def replace():
-                new_str = re.sub(regex, tag_replace, content, re.MULTILINE)
                 regex = r"\<(.*?)\>"
                 def tag_r(match):
                     full_match = match.group(1)
@@ -57,6 +56,7 @@ class Tags():
                         return full_match
                     finally:
                         return str(subject)
+                new_str = re.sub(regex, tag_replace, new_str, re.MULTILINE)
                 return new_str
             new_str = await self.bot.loop.run_in_executor(None,replace)
             return await ctx.send(new_str)
