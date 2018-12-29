@@ -21,23 +21,6 @@ class Tags():
             await self.bot.db.execute("UPDATE tags SET uses=$1 WHERE server_id=$2 AND name = $3;",uses,ctx.guild.id,search)
             content = data["content"]
             def replace():
-                regex = r"{(?:ctx\.([\w\.]+))}+"
-                def tag_replace(match):
-                    full_match = match.group(0)
-                    result = match.group(1)
-                    subject = ctx
-                    attrs = result.split('.')
-                    if attrs[0] not in ['author', 'channel','message']:
-                        return full_match
-                    try:
-                        for attr in attrs:
-                            if attr.startswith('_'):
-                                return full_match
-                            subject = getattr(subject, attr)
-                    except AttributeError:
-                        return full_match
-                    finally:
-                        return str(subject)
                 new_str = re.sub(regex, tag_replace, content, re.MULTILINE)
                 regex = r"\<(.*?)\>"
                 def tag_r(match):
@@ -56,7 +39,24 @@ class Tags():
                     resp = requests.get("http://api.paiza.io:80/runners/get_details?id="+status_id+"&api_key=guest")
                     full_match = resp.json()["stdout"].strip("\n") if resp.json()["stderr"] == "" else resp.json()["stderr"]
                     return full_match
-                new_str = re.sub(regex, tag_r, new_str, re.MULTILINE)
+                new_str = re.sub(regex, tag_r, content, re.MULTILINE)
+                regex = r"{(?:ctx\.([\w\.]+))}+"
+                def tag_replace(match):
+                    full_match = match.group(0)
+                    result = match.group(1)
+                    subject = ctx
+                    attrs = result.split('.')
+                    if attrs[0] not in ['author', 'channel','message']:
+                        return full_match
+                    try:
+                        for attr in attrs:
+                            if attr.startswith('_'):
+                                return full_match
+                            subject = getattr(subject, attr)
+                    except AttributeError:
+                        return full_match
+                    finally:
+                        return str(subject)
                 return new_str
             new_str = await self.bot.loop.run_in_executor(None,replace)
             return await ctx.send(new_str)
