@@ -93,32 +93,26 @@ class Regular():
             
 
     @commands.command()
-    async def delete(self, ctx, amount:int):
-        'Deletes Messages'
-        if ctx.author.guild_permissions.administrator:
-            try:
-                await ctx.channel.purge(limit=amount+1)
-                await ctx.send(amount + ' Messages Deleted')
-            except discord.errors.ClientException:
-                await ctx.send('Can only delete in range 2, 100.')
+    @commands.has_permissions(manage_messages=True)
+    async def purge(self, ctx, limit:int=100):
+        try:
+            await ctx.channel.purge(limit=limit)
+        except:
+            await ctx.send("Could not delete messages")
         else:
-            return
+            await ctx.send("Deleted "+str(limit)+" messages.")
 
     @commands.command()
-    async def purge(self,ctx,user:discord.Member, num : int):
-        if ctx.author.guild_permissions.administrator:
-            def check(message):
-                return message.author == user
-            await ctx.channel.purge(limit = num, check=check)
-            
-    @commands.command()
-    async def clean(self,ctx,num:int):
-        if not ctx.author.id == 422181415598161921 or ctx.author.guild_permissions.administrator:
-            return
+    @commands.has_permissions(manage_messages=True)
+    async def cleanup(self, ctx, limit:int=25):
+        def check(message):
+            return message.content.startswith("c!") or message.author == self.bot.user
+        try:
+            deleted = await ctx.channel.purge(limit=limit, check=check)
+        except:
+            await ctx.send("Could not delete messages")
         else:
-            def check(message):
-                return message.author == self.bot.user
-            await ctx.channel.purge(limit = num+1, check=check)
+            await ctx.send("Deleted "+str(len(deleted))+" messages.")
             
 
     @commands.command(aliases=['info'])
