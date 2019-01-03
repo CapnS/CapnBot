@@ -96,7 +96,7 @@ class Regular():
     @commands.has_permissions(manage_messages=True)
     async def purge(self, ctx, limit:int=100):
         try:
-            await ctx.channel.purge(limit=limit)
+            await ctx.channel.purge(limit=limit+1)
         except:
             await ctx.send("Could not delete messages")
         else:
@@ -108,7 +108,7 @@ class Regular():
         def check(message):
             return message.content.startswith("c!") or message.author == self.bot.user
         try:
-            deleted = await ctx.channel.purge(limit=limit, check=check)
+            deleted = await ctx.channel.purge(limit=limit+1, check=check)
         except:
             await ctx.send("Could not delete messages")
         else:
