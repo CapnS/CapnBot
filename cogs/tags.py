@@ -58,10 +58,13 @@ class Tags():
             new_str = await self.bot.loop.run_in_executor(None,replace)
             return await ctx.send(new_str)
         data = await self.bot.db.fetch("SELECT * FROM tags WHERE server_id=$1 AND name % $2 ORDER BY similarity(name,$2) DESC LIMIT 3;",ctx.guild.id,search)
-        msg = ""
-        for match in data:
-            msg = msg + match["name"] + "\n"
-        await ctx.send("This tag doesn't exist, try these instead: \n" + msg)
+        if data:
+            msg = ""
+            for match in data:
+                msg = msg + match["name"] + "\n"
+            await ctx.send("This tag doesn't exist, try these instead: \n" + msg)
+        else:
+            await ctx.send("This tag doesn't exist.")
 
     @tag.command()
     @commands.guild_only()
