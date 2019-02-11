@@ -13,6 +13,7 @@ class Tags():
         self.bot = bot
     
     @commands.group(invoke_without_command=True)
+    @commands.guild_only()
     async def tag(self,ctx,*,search):
         '''responds with a tag'''
         data = await self.bot.db.fetchrow("SELECT * FROM tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,search)
@@ -63,6 +64,7 @@ class Tags():
         await ctx.send("This tag doesn't exist, try these instead: \n" + msg)
 
     @tag.command()
+    @commands.guild_only()
     async def alias(self,ctx,name,*,new_name):
         data = await self.bot.db.fetch("SELECT * from tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,new_name)
         if data:
@@ -76,6 +78,7 @@ class Tags():
         await ctx.send(f"Alias {new_name} has been created")        
 
     @tag.command()
+    @commands.guild_only()
     async def create(self,ctx,name,*,content):
         '''creates a tag'''
         data = await self.bot.db.fetch("SELECT * from tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,name)
@@ -86,6 +89,7 @@ class Tags():
         await ctx.send(f"Tag {name} has been created")
 
     @tag.command()
+    @commands.guild_only()
     async def delete(self,ctx,*,name):
         '''deletes a tag you own'''
         data = await self.bot.db.fetch("SELECT * from tags WHERE server_id=$1 AND name=$2 AND owner_id=$3;",ctx.guild.id,name,ctx.author.id)
@@ -95,6 +99,7 @@ class Tags():
         await ctx.send("Tag either doesn't belong to you or doesn't exist")
 
     @tag.command()
+    @commands.guild_only()
     async def edit(self,ctx,name,*,content):
         '''edits a tag you own'''
         data = await self.bot.db.fetch("SELECT * from tags WHERE server_id=$1 AND name=$2 AND owner_id=$3;",ctx.guild.id,name,ctx.author.id)
@@ -104,6 +109,7 @@ class Tags():
         await ctx.send("Tag either doesn't belong to you or doesn't exist")
 
     @tag.command()
+    @commands.guild_only()
     async def search(self,ctx,*,search):
         '''searches for a tag'''
         data = await self.bot.db.fetch("SELECT * FROM tags WHERE server_id=$1 and name % $2 ORDER BY similarity(name,$2) DESC LIMIT 50;",ctx.guild.id,search)
@@ -114,6 +120,7 @@ class Tags():
         await p.paginate()
 
     @commands.command()
+    @commands.guild_only()
     async def tags(self,ctx):
         '''shows all your tags in a server'''
         data = await self.bot.db.fetch("SELECT * FROM tags WHERE server_id=$1 AND owner_id=$2;",ctx.guild.id,ctx.author.id)
@@ -126,6 +133,7 @@ class Tags():
         await p.paginate()
 
     @tag.command()
+    @commands.guild_only()
     async def claim(self,ctx,*,name):
         '''claims an unowned tag'''
         data = await self.bot.db.fetchrow("SELECT * FROM tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,name)
@@ -139,6 +147,7 @@ class Tags():
         await ctx.send("Tag now belongs to you")
 
     @tag.command()
+    @commands.guild_only()
     async def info(self,ctx,*,name):
         '''gets info on a command'''
         data = await self.bot.db.fetchrow("SELECT * FROM tags WHERE server_id=$1 and name=$2;",ctx.guild.id,name)
@@ -174,6 +183,7 @@ class Tags():
         await ctx.send(embed=em)
 
     @tag.command()
+    @commands.guild_only()
     async def all(self,ctx):
         ''' shows all tags for a server'''
         data = await self.bot.db.fetch("SELECT * FROM tags WHERE server_id=$1;",ctx.guild.id)
@@ -186,6 +196,7 @@ class Tags():
         await p.paginate()        
 
     @tag.command()
+    @commands.guild_only()
     async def raw(self,ctx,*,name):
         '''gets raw data from a tag'''
         data = await self.bot.db.fetchrow("SELECT * FROM tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,name)
