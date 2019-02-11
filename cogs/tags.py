@@ -49,7 +49,7 @@ class Tags():
                     d = {"clientId": client_id,"clientSecret":client_secret,"script":full_match,"language":"python3","versionIndex":"2"}
                     returned = requests.post("https://api.jdoodle.com/execute", json=d)
                     try:
-                        full_match = returned.json["output"]
+                        full_match = returned.json()["output"]
                     except ValueError:
                         full_match = "~ERROR~"
                     return full_match
