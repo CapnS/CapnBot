@@ -42,19 +42,15 @@ class Tags():
                 regex = r"\~(.*?)\~"
                 def tag_r(match):
                     full_match = match.group(1)
-                    full_match = full_match.replace(" ", "%20")
-                    full_match = full_match.replace(";","%3B")
-                    returned = requests.post("http://api.paiza.io:80/runners/create?source_code="+full_match+"&language=python3&api_key=guest")
-                    if returned.json()["status"] != "running":
-                        return "Error"
-                    else:
-                        status_id = returned.json()["id"]
-                    finished = False
-                    while not finished:
-                        r = requests.get("http://api.paiza.io:80/runners/get_status?id="+status_id+"&api_key=guest")
-                        finished = r.json()["status"] == "completed"
-                    resp = requests.get("http://api.paiza.io:80/runners/get_details?id="+status_id+"&api_key=guest")
-                    full_match = resp.json()["stdout"].strip("\n") if resp.json()["stderr"] == "" else resp.json()["stderr"]
+                    data = await self.bot.db.fetchrow("SELECT * FROM keys;")
+                    client_id = data["jdoodle_id"]
+                    client_secret = data["jdoodle_secret"]
+                    d = {"clientId": client_id,"clientSecret":client_secret,"script":full_match,"language":"python3","versionIndex":"2"}
+                    returned = requests.post("https://api.jdoodle.com/execute", json=data)
+                    try:
+                        full_match = returned.json["output"]
+                    except ValueError:
+                        full_match = "~ERROR~"
                     return full_match
                 new_str = re.sub(regex, tag_r, new_str, re.MULTILINE)
                 return new_str
