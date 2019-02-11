@@ -20,6 +20,9 @@ class Tags():
             uses = data["uses"]+1
             await self.bot.db.execute("UPDATE tags SET uses=$1 WHERE server_id=$2 AND name = $3;",uses,ctx.guild.id,search)
             content = data["content"]
+            data = await self.bot.db.fetchrow("SELECT * FROM keys;")
+            client_id = data["jdoodle_id"]
+            client_secret = data["jdoodle_secret"]
             def replace():
                 regex = r"<(?:ctx\.([\w\.]+))>+"
                 def tag_replace(match):
@@ -42,11 +45,8 @@ class Tags():
                 regex = r"\~(.*?)\~"
                 def tag_r(match):
                     full_match = match.group(1)
-                    data = await self.bot.db.fetchrow("SELECT * FROM keys;")
-                    client_id = data["jdoodle_id"]
-                    client_secret = data["jdoodle_secret"]
                     d = {"clientId": client_id,"clientSecret":client_secret,"script":full_match,"language":"python3","versionIndex":"2"}
-                    returned = requests.post("https://api.jdoodle.com/execute", json=data)
+                    returned = requests.post("https://api.jdoodle.com/execute", json=d)
                     try:
                         full_match = returned.json["output"]
                     except ValueError:
