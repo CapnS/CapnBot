@@ -315,11 +315,11 @@ class Misc():
             try:
                 channel = ctx.guild.get_channel(data['channel_id'])
                 if not channel:
-                    pass
+                    await self.bot.db.execute("DELETE FROM tracked_channels WHERE guild_id = $1;", ctx.guild.id)
                 else:
                     return await ctx.send("Your guild members are already being tracked")
             except:
-                pass
+                await self.bot.db.execute("DELETE FROM tracked_channels WHERE guild_id = $1;", ctx.guild.id)
         members = str(len(ctx.guild.members))
         try:
             overwrite = {
