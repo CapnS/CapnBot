@@ -298,12 +298,40 @@ class Misc():
                 await ctx.send(joke)
 
     @commands.command()
-    async def joke(self,ctx):
+    async def joke(self, ctx):
         async with aiohttp.ClientSession() as session:
             headers ={"Accept":"application/json"}
             async with session.get("https://icanhazdadjoke.com/",headers=headers) as resp:
                 data = await resp.json()
                 joke = data.get("joke")
                 await ctx.send(joke)
+
+    @commands.command()
+    async def track_users(self, ctx):
+        if not ctx..author.guild_permissions.administrator:
+            return await ctx.send("You have to be an administrator to use this command")
+        data = await self.bot.db.fetchrow("SELECT * from tracked_channels WHERE guild_id = $1;", ctx.guild.id)
+        if data:
+            try:
+                channel = ctx.guild.get_channel(data['channel_id'])
+                if not channel:
+                    pass
+                else:
+                    return await ctx.send("Your guild members are already being tracked")
+            except:
+                pass
+        members = str(len(ctx.guild.members))
+        try:
+            overwrite = {
+                guild.default_role: discord.PermissionOverwrite(connect=False)
+                }
+            channel = await ctx.guild.create_text_channel(
+                "User Count: "+ members,
+                overwrite
+                )
+        except discord.errors.Forbidden:
+            return await ctx.send("The bot does not have permissions to make a new channel")
+        await self.bot.db.execute("INSERT INTO tracked_channels VALUES ($1, $2);', ctx.guild.id, channel.id)
+            
 def setup(bot):
     bot.add_cog(Misc(bot))
