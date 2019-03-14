@@ -323,7 +323,8 @@ class Misc():
         members = str(len(ctx.guild.members))
         try:
             overwrite = {
-                ctx.guild.default_role: discord.PermissionOverwrite(connect=False)
+                ctx.guild.default_role: discord.PermissionOverwrite(connect=False),
+                ctx.guild.me: discord.PermissionOverwrite(manage_channel=True)
                 }
             channel = await ctx.guild.create_voice_channel(
                 "User Count: "+ members,
