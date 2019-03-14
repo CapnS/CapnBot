@@ -315,10 +315,11 @@ async def on_command(ctx):
     await bot.db.execute("UPDATE commands SET uses=$1 WHERE command_name=$2;",uses,name)
     bot.counter += 1
 
-c = bot.get_channel(488766177758281729)
+
 @bot.event
 async def on_member_join(member):
     data = await bot.db.fetchrow('SELECT * FROM tracked_channels WHERE guild_id = $1;', member.guild.id)
+    c = bot.get_channel(488766177758281729)
     await c.send("join1")
     if data:
         await c.send("join2")
@@ -331,6 +332,7 @@ async def on_member_join(member):
 @bot.event
 async def on_member_remove(member):
     data = await bot.db.fetchrow('SELECT * FROM tracked_channels WHERE guild_id = $1;', member.guild.id)
+    c = bot.get_channel(488766177758281729)
     await c.send("remove1")
     if data:
         await c.send("remove2")
