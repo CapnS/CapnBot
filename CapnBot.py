@@ -315,25 +315,30 @@ async def on_command(ctx):
     await bot.db.execute("UPDATE commands SET uses=$1 WHERE command_name=$2;",uses,name)
     bot.counter += 1
 
+c = bot.get_channel(488766177758281729)
 @bot.event
 async def on_member_join(member):
     data = await bot.db.fetchrow('SELECT * FROM tracked_channels WHERE guild_id = $1;', member.guild.id)
+    await c.send("join1")
     if data:
+        await c.send("join2")
         channel = member.guild.get_channel(data[member.guild.id])
         try:
             await channel.edit(name="User Count: "+str(len(member.guild.members)))
         except discord.errors.Forbidden:
-            pass
+            await c.send("FORBIDDEN")
 
 @bot.event
 async def on_member_remove(member):
     data = await bot.db.fetchrow('SELECT * FROM tracked_channels WHERE guild_id = $1;', member.guild.id)
+    await c.send("remove1")
     if data:
+        await c.send("remove2")
         channel = member.guild.get_channel(data[member.guild.id])
         try:
             await channel.edit(name="User Count: "+str(len(member.guild.members)))
         except discord.errors.Forbidden:
-            pass
+            await c.send("FORBIDDEN")
 
 async def update_guild_count():
     await bot.wait_until_ready()
