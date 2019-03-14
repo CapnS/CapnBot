@@ -325,7 +325,7 @@ class Misc():
             overwrite = {
                 ctx.guild.default_role: discord.PermissionOverwrite(connect=False)
                 }
-            channel = await ctx.guild.create_text_channel(
+            channel = await ctx.guild.create_voice_channel(
                 "User Count: "+ members,
                 overwrites=overwrite
                 )
