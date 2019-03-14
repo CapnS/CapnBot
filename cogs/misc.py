@@ -331,7 +331,7 @@ class Misc():
                 )
         except discord.errors.Forbidden:
             return await ctx.send("The bot does not have permissions to make a new channel")
-        await self.bot.db.execute("INSERT INTO tracked_channels VALUES ($1, $2);', ctx.guild.id, channel.id)
+        await self.bot.db.execute("INSERT INTO tracked_channels VALUES ($1, $2);", ctx.guild.id, channel.id)
             
 def setup(bot):
     bot.add_cog(Misc(bot))
