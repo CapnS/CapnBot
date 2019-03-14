@@ -308,7 +308,7 @@ class Misc():
 
     @commands.command()
     async def track_users(self, ctx):
-        if not ctx..author.guild_permissions.administrator:
+        if not ctx.author.guild_permissions.administrator:
             return await ctx.send("You have to be an administrator to use this command")
         data = await self.bot.db.fetchrow("SELECT * from tracked_channels WHERE guild_id = $1;", ctx.guild.id)
         if data:
