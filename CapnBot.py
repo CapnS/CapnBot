@@ -321,7 +321,7 @@ async def on_member_join(member):
     if data:
         channel = member.guild.get_channel(data[member.guild.id])
         try:
-            await channel.edit(name="User Count: "+str(len(member.server.members)))
+            await channel.edit(name="User Count: "+str(len(member.guild.members)))
         except:
             pass
 
@@ -331,7 +331,7 @@ async def on_member_remove(member):
     if data:
         channel = member.guild.get_channel(data[member.guild.id])
         try:
-            await channel.edit(name="User Count: "+str(len(member.server.members)))
+            await channel.edit(name="User Count: "+str(len(member.guild.members)))
         except:
             pass
 
