@@ -322,7 +322,7 @@ async def on_member_join(member):
         channel = member.guild.get_channel(data[member.guild.id])
         try:
             await channel.edit(name="User Count: "+str(len(member.guild.members)))
-        except:
+        except discord.errors.Forbidden:
             pass
 
 @bot.event
@@ -332,7 +332,7 @@ async def on_member_remove(member):
         channel = member.guild.get_channel(data[member.guild.id])
         try:
             await channel.edit(name="User Count: "+str(len(member.guild.members)))
-        except:
+        except discord.errors.Forbidden:
             pass
 
 async def update_guild_count():
