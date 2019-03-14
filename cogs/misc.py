@@ -327,7 +327,7 @@ class Misc():
                 }
             channel = await ctx.guild.create_text_channel(
                 "User Count: "+ members,
-                overwrite
+                overwrites=overwrite
                 )
         except discord.errors.Forbidden:
             return await ctx.send("The bot does not have permissions to make a new channel")
