@@ -323,7 +323,7 @@ class Misc():
         members = str(len(ctx.guild.members))
         try:
             overwrite = {
-                guild.default_role: discord.PermissionOverwrite(connect=False)
+                ctx.guild.default_role: discord.PermissionOverwrite(connect=False)
                 }
             channel = await ctx.guild.create_text_channel(
                 "User Count: "+ members,
@@ -332,6 +332,7 @@ class Misc():
         except discord.errors.Forbidden:
             return await ctx.send("The bot does not have permissions to make a new channel")
         await self.bot.db.execute("INSERT INTO tracked_channels VALUES ($1, $2);", ctx.guild.id, channel.id)
+        await ctx.send("User count is now being tracked.")
             
 def setup(bot):
     bot.add_cog(Misc(bot))
