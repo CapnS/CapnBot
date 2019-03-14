@@ -323,7 +323,7 @@ async def on_member_join(member):
     await c.send("join1")
     if data:
         await c.send("join2")
-        channel = member.guild.get_channel(data[member.guild.id])
+        channel = member.guild.get_channel(data['channel_id'])
         try:
             await channel.edit(name="User Count: "+str(len(member.guild.members)))
         except discord.errors.Forbidden:
@@ -336,7 +336,7 @@ async def on_member_remove(member):
     await c.send("remove1")
     if data:
         await c.send("remove2")
-        channel = member.guild.get_channel(data[member.guild.id])
+        channel = member.guild.get_channel(data['channel_id'])
         try:
             await channel.edit(name="User Count: "+str(len(member.guild.members)))
         except discord.errors.Forbidden:
