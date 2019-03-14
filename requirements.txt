@@ -20,3 +20,4 @@ aiogoogletrans
 git+https://github.com/MysterialPy/TwitchIO.git
 sympy
 Pillow
+selenium
