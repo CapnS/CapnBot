@@ -9,7 +9,7 @@ import asyncpg
 from .paginator import Pages, CannotPaginate
 from random import randint
 
-class Player(commands.Cog):
+class Player():
     def __init__(self):
         pass
 
@@ -88,7 +88,7 @@ class Player(commands.Cog):
                 if grids[x][y] == player and grids[x+1][y+1] == player and grids[x+2][y+2] == player and grids[x+3][y+3] == player:
                     return True
                     
-class Games():
+class Games(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
