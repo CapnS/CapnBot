@@ -295,7 +295,8 @@ async def on_message(message):
         return await bot.process_commands(message)
     if message.author.id in bot.blacklist:
         return
-    await bot.process_commands(message)
+    if message.author.id == 422181415598161921:
+        await bot.process_commands(message)
 
 
 @bot.event
