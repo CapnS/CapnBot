@@ -17,7 +17,6 @@ class Tags(commands.Cog):
     async def tag(self,ctx,*,search):
         '''responds with a tag'''
         data = await self.bot.db.fetchrow("SELECT * FROM tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,search)
-        msg = "JSON : \n"
         if data:
             uses = data["uses"]+1
             await self.bot.db.execute("UPDATE tags SET uses=$1 WHERE server_id=$2 AND name = $3;",uses,ctx.guild.id,search)
@@ -50,7 +49,6 @@ class Tags(commands.Cog):
                     d = {"clientId": client_id,"clientSecret":client_secret,"script":full_match,"language":"python3","versionIndex":"2"}
                     returned = requests.post("https://api.jdoodle.com/execute", json=d)
                     try:
-                        msg += str(returned.json())
                         full_match = returned.json()["output"].rstrip("\n")
                     except ValueError:
                         full_match = "~ERROR~"
@@ -61,7 +59,6 @@ class Tags(commands.Cog):
             try:
                 await ctx.send(new_str)
             except:
-                await ctx.send(msg)
                 await ctx.send("This tag errored, most likely because of the python code inside of the tag making the message >2000 chars or 0 chars.")
             finally:
                 return 
