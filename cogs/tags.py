@@ -50,9 +50,9 @@ class Tags(commands.Cog):
                     d = {"clientId": client_id,"clientSecret":client_secret,"script":full_match,"language":"python3","versionIndex":"2"}
                     returned = requests.post("https://api.jdoodle.com/execute", json=d)
                     try:
+                        msg += str(returned.json())
                         full_match = returned.json()["output"].rstrip("\n")
                     except ValueError:
-                        msg += str(returned.json())
                         full_match = "~ERROR~"
                     return full_match
                 new_str = re.sub(regex, tag_r, new_str, re.MULTILINE)
