@@ -3,7 +3,7 @@ from discord.ext import commands
 import math
 import sympy
 
-class Math():
+class Math(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot

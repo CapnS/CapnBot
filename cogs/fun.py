@@ -7,7 +7,7 @@ from pyfiglet import figlet_format, FontError, FontNotFound
 import urllib.parse
 'Module for fun/meme commands commands'
 
-class Fun():
+class Fun(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot

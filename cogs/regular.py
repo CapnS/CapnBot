@@ -12,7 +12,7 @@ import traceback
 import aiohttp
 import copy
 
-class Regular():
+class Regular(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot

@@ -5,7 +5,7 @@ import aiohttp
 import datetime
 
 
-class Twitch():
+class Twitch(commands.Cog):
     def __init__(self,bot):
         self.bot = bot
         

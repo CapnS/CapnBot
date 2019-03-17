@@ -8,7 +8,7 @@ import dweepy
 import git 
 from .paginator import Pages,HelpPaginator, CannotPaginate
 
-class BotInfo():
+class BotInfo(commands.Cog):
     def __init__(self,bot):
         self.bot=bot
         self.process = psutil.Process()

@@ -18,7 +18,7 @@ b = BtcConverter()
 u = asyncurban.UrbanDictionary()
 t = aiogoogletrans.Translator()
 
-class Internet():
+class Internet(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot

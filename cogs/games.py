@@ -9,7 +9,7 @@ import asyncpg
 from .paginator import Pages, CannotPaginate
 from random import randint
 
-class Player:
+class Player(commands.Cog):
     def __init__(self):
         pass
 

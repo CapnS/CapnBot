@@ -78,7 +78,7 @@ class TabularData:
         to_draw.append(sep)
         return '\n'.join(to_draw)
 
-class Misc():
+class Misc(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot

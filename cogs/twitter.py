@@ -5,7 +5,7 @@ from time import sleep
 import time 
 import random
 
-class Twitter():
+class Twitter(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
