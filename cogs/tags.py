@@ -17,6 +17,7 @@ class Tags(commands.Cog):
     async def tag(self,ctx,*,search):
         '''responds with a tag'''
         data = await self.bot.db.fetchrow("SELECT * FROM tags WHERE server_id=$1 AND name=$2;",ctx.guild.id,search)
+        msg = "JSON : \n"
         if data:
             uses = data["uses"]+1
             await self.bot.db.execute("UPDATE tags SET uses=$1 WHERE server_id=$2 AND name = $3;",uses,ctx.guild.id,search)
@@ -51,7 +52,7 @@ class Tags(commands.Cog):
                     try:
                         full_match = returned.json()["output"].rstrip("\n")
                     except ValueError:
-                        msg = str(returned.json())
+                        msg += str(returned.json())
                         full_match = "~ERROR~"
                     return full_match
                 new_str = re.sub(regex, tag_r, new_str, re.MULTILINE)

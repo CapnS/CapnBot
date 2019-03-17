@@ -16,7 +16,7 @@ class CommandErrorHandler(commands.Cog):
         """The event triggered when an error is raised while invoking a command.
         ctx   : Context
         error : Exception"""
-        
+        await ctx.send("ERRORED AND FIRED")
         if hasattr(ctx.command, 'on_error'):
             return
 
