@@ -298,12 +298,42 @@ class Misc(commands.Cog):
                 await ctx.send(joke)
 
     @commands.command()
-    async def joke(self,ctx):
+    async def joke(self, ctx):
         async with aiohttp.ClientSession() as session:
             headers ={"Accept":"application/json"}
             async with session.get("https://icanhazdadjoke.com/",headers=headers) as resp:
                 data = await resp.json()
                 joke = data.get("joke")
                 await ctx.send(joke)
+
+    @commands.command()
+    async def track_users(self, ctx):
+        if not ctx.author.guild_permissions.administrator:
+            return await ctx.send("You have to be an administrator to use this command")
+        data = await self.bot.db.fetchrow("SELECT * from tracked_channels WHERE guild_id = $1;", ctx.guild.id)
+        if data:
+            try:
+                channel = ctx.guild.get_channel(data['channel_id'])
+                if not channel:
+                    await self.bot.db.execute("DELETE FROM tracked_channels WHERE guild_id = $1;", ctx.guild.id)
+                else:
+                    return await ctx.send("Your guild members are already being tracked")
+            except:
+                await self.bot.db.execute("DELETE FROM tracked_channels WHERE guild_id = $1;", ctx.guild.id)
+        members = str(len(ctx.guild.members))
+        try:
+            overwrite = {
+                ctx.guild.default_role: discord.PermissionOverwrite(connect=False),
+                ctx.guild.me: discord.PermissionOverwrite(manage_channels=True, connect=True)
+                }
+            channel = await ctx.guild.create_voice_channel(
+                "User Count: "+ members,
+                overwrites=overwrite
+                )
+        except discord.errors.Forbidden:
+            return await ctx.send("The bot does not have permissions to make a new channel")
+        await self.bot.db.execute("INSERT INTO tracked_channels VALUES ($1, $2);", ctx.guild.id, channel.id)
+        await ctx.send("User count is now being tracked.")
+            
 def setup(bot):
     bot.add_cog(Misc(bot))
