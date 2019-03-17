@@ -51,12 +51,19 @@ class Tags(commands.Cog):
                     try:
                         full_match = returned.json()["output"].rstrip("\n")
                     except ValueError:
+                        msg = str(returned.json())
                         full_match = "~ERROR~"
                     return full_match
                 new_str = re.sub(regex, tag_r, new_str, re.MULTILINE)
                 return new_str
             new_str = await self.bot.loop.run_in_executor(None,replace)
-            return await ctx.send(new_str)
+            try:
+                await ctx.send(new_str)
+            except:
+                await ctx.send(msg)
+                await ctx.send("This tag errored, most likely because of the python code inside of the tag making the message >2000 chars or 0 chars.")
+            finally:
+                return 
         data = await self.bot.db.fetch("SELECT * FROM tags WHERE server_id=$1 AND name % $2 ORDER BY similarity(name,$2) DESC LIMIT 3;",ctx.guild.id,search)
         if data:
             msg = ""
