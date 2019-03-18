@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
-import math
-import sympy
+import aiohttp
 
 class Math(commands.Cog):
 
@@ -78,9 +77,31 @@ class Math(commands.Cog):
         await ctx.send(str(answer))
 
     @commands.command()
-    async def solve(self,ctx,*,equation):
-        answer = sympy.solvers.solve(equation,"x")
-        await ctx.send(answer)
+    async def solve(self, ctx,*,eq):
+        start = "from sympy import *\nfrom sympy.core.sympify import SympifyError\nx, y, z = symbols('x y z')\ninit_printing(use_unicode=True)\n"
+        statement = start + 'eval("'+eq+'")'
+        l = "\n".split(statement)
+        s = ",".join(l)
+        data = {"print_statement":[s],"statement":statement,"printer":"latex","session":None,"privacy":"on"}
+        async with aiohttp.ClientSession() as session:
+            async with session.post("https://live.sympy.org/evaluate", json=data) as r:
+                x = await r.json()
+                x = x['output']
+        if "=" in eq:
+            s1, s2 = eq.split("=")
+            statement = start + 'solve(Eq(eval("'+s1+'"), eval("'+s2+'")),x)'
+        elif x == eq:
+            statement = start + 'solve("'+eq+'")'
+        else:
+            statement = start + 'eval("'+eq+'")'
+        l = "\n".split(statement)
+        s = ",".join(l)
+        data = {"print_statement":[s],"statement":statement,"printer":"latex","session":None,"privacy":"on"}
+        async with aiohttp.ClientSession() as session:
+            async with session.post("https://live.sympy.org/evaluate", json=data) as r:
+                x= await r.json()
+                answer = x['output']
+        await ctx.send("```"+answer+"```")
 
 def setup(bot):
     bot.add_cog(Math(bot))
