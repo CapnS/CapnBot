@@ -43,7 +43,7 @@ class Tags(commands.Cog):
                     finally:
                         return str(subject)
                 new_str = re.sub(regex, tag_replace, content, re.MULTILINE)
-                regex = r"\~(.*?)\~"
+                regex = r"\~(.+?)\~"
                 def tag_r(match):
                     full_match = match.group(1)
                     d = {"clientId": client_id,"clientSecret":client_secret,"script":full_match,"language":"python3","versionIndex":"2"}

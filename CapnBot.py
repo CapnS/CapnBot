@@ -297,7 +297,6 @@ async def on_message(message):
         return
     await bot.process_commands(message)
 
-
 @bot.event
 async def on_command(ctx):
     name = ctx.command.qualified_name
