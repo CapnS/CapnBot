@@ -218,7 +218,7 @@ class Star(commands.Cog):
             await ctx.send("Could not delete that message.")
         
     @star.command()
-    async def start(self, ctx, channel:discord.Channel, needed:int=3):
+    async def start(self, ctx, channel:discord.TextChannel, needed:int=3):
         '''Starts the starboard in the channel provided with the given amount of stars needed'''
         channel_data = await self.bot.db.fetchrow("SELECT * FROM star_channels WHERE guild_id=$1", ctx.guild.id)
         if channel_data:
