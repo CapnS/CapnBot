@@ -37,28 +37,23 @@ class Star(commands.Cog):
             old_starrers = starrers["starrers"]
             if payload.user_id in old_starrers:
                 return
-        c = self.bot.get_channel(payload.channel_id)
-        if not c:
-            return
-        m = await c.fetch_message(payload.message_id)
-        if not m:
-            return
         try:
-            new_starrers = old_starrers.append(payload.user_id)
-        except:
+            old_starrers.append(payload.user_id)
+            new_starrers = old_starrers
+        except NameError:
+            c = self.bot.get_channel(payload.channel_id)
+            m = await c.fetch_message(payload.message_id)
+            if m.author.id == payload.user_id:
+                return
+            new_starrers = [payload.user_id]
             if channel_data["needed"] != 1:
-                new_starrers = [payload.user_id]
                 await self.bot.db.execute("INSERT INTO starrers VALUES ($1, $2)", payload.message_id, new_starrers)
                 return
-            else:
-                new_starrers = [payload.user_id]
         message_data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE original_message_id=$1", payload.message_id)
         if not message_data:
             message_data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE starboard_message_id=$1", payload.message_id)
             if not message_data:
                 c = self.bot.get_channel(payload.channel_id)
-                if not c:
-                    return
                 m = await c.fetch_message(payload.message_id)
                 if payload.user_id == m.author.id:
                     return
@@ -80,26 +75,18 @@ class Star(commands.Cog):
                 channel = self.bot.get_channel(channel_data["channel_id"])
                 count = len(new_starrers)
                 content = ":star:"+str(count)+ " | "+channel.mention
-                try:
-                    message = await channel.send(content, embed=em)
-                except:
-                    return
-                await self.bot.db.execute("INSERT INTO starboard VALUES($1, $2, $3, $4)", payload.message_id, message.id, message.channel.id, count)
+                message = await channel.send(content, embed=em)
+                await self.bot.db.execute("INSERT INTO starboard VALUES($1, $2, $3, $4, $5)", payload.message_id, message.id, message.channel.id, count, m.author.id)
                 await self.bot.db.execute("INSERT INTO starrers VALUES ($1, $2)", payload.message_id, new_starrers)
                 return
+        if payload.user_id == message_data["author_id"]:
+            return
         c = self.bot.get_channel(message_data["channel_id"])
-        if not c:
-            return
         message = await c.fetch_message(message_data["starboard_message_id"])
-        if not message:
-            return
         em = message.embeds[0]
         count = message_data["stars"] + 1
         content = ":star:"+str(count)+ " | " + c.mention
-        try:
-            await message.edit(content=content, embed=em)
-        except:
-            return
+        await message.edit(content=content, embed=em)
         await self.bot.db.execute("UPDATE starboard SET stars=$1 WHERE starboard_message_id=$2", count, message_data["starboard_message_id"])
         await self.bot.db.execute("UPDATE starrers SET starrers=$1 WHERE message_id=$2", new_starrers, payload.message_id)
 
@@ -123,12 +110,9 @@ class Star(commands.Cog):
         else:
             old_starrers = starrers["starrers"]
         c = self.bot.get_channel(payload.channel_id)
-        if not c:
-            return
         m = await c.fetch_message(payload.message_id)
-        if not m:
-            return
         try:
+            new_starrers = []
             for i, user_id in enumerate(old_starrers):
                 if user_id == payload.user_id:
                     old_starrers.pop(i)
@@ -136,11 +120,17 @@ class Star(commands.Cog):
                     break
         except:
             new_starrers = []
+        if await self.bot.db.fetchrow("SELECT * FROM starrers WHERE message_id=$1", payload.message_id):
+            await self.bot.db.execute("UPDATE starrers SET starrers=$1 WHERE message_id=$2", new_starrers, payload.message_id)
+        else:
+            await self.bot.db.execute("UPDATE starrers SET starrers=$1 WHERE message_id=$2", new_starrers, starboard_data["original_message_id"])
         message_data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE original_message_id=$1", payload.message_id)
         if not message_data:
             message_data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE starboard_message_id=$1", payload.message_id)
             if not message_data:
-                return 
+                return
+        if payload.user_id == message_data["author_id"]:
+            return
         if message_data["stars"] - 1 < channel_data["needed"]:
             if starrers:
                 for i, user_id in enumerate(old_starrers):
@@ -157,25 +147,16 @@ class Star(commands.Cog):
                 if not message_data:
                     return
             c = self.bot.get_channel(message_data["channel_id"])
-            if not c:
-                return
             m = await c.fetch_message(message_data["starboard_message_id"])
             await m.delete()
             await self.bot.db.execute("DELETE FROM starboard WHERE original_message_id=$1", message_data["original_message_id"])
             return
         c = self.bot.get_channel(message_data["channel_id"])
-        if not c:
-            return
         message = await c.fetch_message(message_data["starboard_message_id"])
-        if not message:
-            return
         em = message.embeds[0]
         count = message_data["stars"] - 1
         content = ":star:"+str(count)+ " | " + c.mention
-        try:
-            await message.edit(content=content, embed=em)
-        except:
-            return
+        await message.edit(content=content, embed=em)
         await self.bot.db.execute("UPDATE starboard SET stars=$1 WHERE starboard_message_id=$2", count, message_data["starboard_message_id"])
         await self.bot.db.execute("UPDATE starrers SET starrers=$1 WHERE message_id=$2", new_starrers, message_data["original_message_id"])
 
@@ -186,10 +167,9 @@ class Star(commands.Cog):
         if not channel_data:
             return await ctx.send("You don't have a starboard setup, ask an admin to set one up for this guild.")
         else:
-            current_channel = self.bot.get_channel(payload.channel_id)
             starboard_channel = self.bot.get_channel(channel_data["channel_id"])
-            if current_channel.is_nsfw() and not starboard_channel.is_nsfw():
-                return 
+            if ctx.channel.is_nsfw() and not starboard_channel.is_nsfw():
+                return await ctx.send("You can't star in an NSFW channel if your starboard isn't NSFW.")
         starrers = await self.bot.db.fetchrow("SELECT * FROM starrers WHERE message_id=$1", message_id)
         if not starrers:
             starboard_data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE starboard_message_id=$1", message_id)
@@ -198,36 +178,37 @@ class Star(commands.Cog):
                 if starrers:
                     old_starrers = starrers["starrers"]
                     if ctx.author.id in old_starrers:
-                        return
+                        return await ctx.send("You've already starred that message")
         else:
             old_starrers = starrers["starrers"]
             if ctx.author.id in old_starrers:
-                return
-        m = await ctx.channel.fetch_message(message_id)
-        if not m:
-            c = self.bot.get_channel(channel_data["channel_id"])
-            m = await c.fetch_message(message_id)
-            if not m:
-                return await ctx.send("That message was not sent in this channel or in the starboard channel.")
+                return await ctx.send("You've already starred that message")
         try:
-            new_starrers = old_starrers.append(ctx.author.id)
-        except:
+            old_starrers.append(ctx.author.id)
+            new_starrers = old_starrers
+        except NameError:
+            try:
+                m = await ctx.channel.fetch_message(message_id)
+            except:
+                c = self.bot.get_channel(channel_data["channel_id"])
+                try:
+                    m = await c.fetch_message(message_id)
+                except:
+                    return await ctx.send("That message was not sent in this channel or in the starboard channel.")
+            if m.author.id == ctx.author.id:
+                return await ctx.send("You can't star your own message.")
+            new_starrers = [ctx.author.id]
             if channel_data["needed"] != 1:
-                new_starrers = [ctx.author.id]
                 await self.bot.db.execute("INSERT INTO starrers VALUES ($1, $2)", message_id, new_starrers)
-                return
-            else:
-                new_starrers = [ctx.author.id]
+                return await ctx.send("Starred the message.")
         message_data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE original_message_id=$1", message_id)
         if not message_data:
             message_data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE starboard_message_id=$1", message_id)
             if not message_data:
                 c = self.bot.get_channel(ctx.channel.id)
-                if not c:
-                    return
                 m = await c.fetch_message(message_id)
-                if ctx.author.id == m.author.id:
-                    return
+                if m.author.id == ctx.author.id:
+                    return await ctx.send("You can't star your own message")
                 gold = discord.Color.gold()
                 em = discord.Embed(description=m.content, color=gold)
                 if m.embeds:
@@ -246,26 +227,18 @@ class Star(commands.Cog):
                 channel = self.bot.get_channel(channel_data["channel_id"])
                 count = len(new_starrers)
                 content = ":star:"+str(count)+ " | "+channel.mention
-                try:
-                    message = await channel.send(content, embed=em)
-                except:
-                    return
+                message = await channel.send(content, embed=em)
                 await self.bot.db.execute("INSERT INTO starrers VALUES ($1, $2)", message_id, new_starrers)
-                await self.bot.db.execute("INSERT INTO starboard VALUES($1, $2, $3, $4)", message_id, message.id, channel.id, count)
-                return
+                await self.bot.db.execute("INSERT INTO starboard VALUES($1, $2, $3, $4, $5)", message_id, message.id, channel.id, count, m.author.id)
+                return await ctx.send("Message Starred")
+        if ctx.author.id == message_data["author_id"]:
+            return await ctx.send("You can't star your own message.")
         c = self.bot.get_channel(message_data["channel_id"])
-        if not c:
-            return
         message = await c.fetch_message(message_data["starboard_message_id"])
-        if not message:
-            return
         em = message.embeds[0]
         count = message_data["stars"] + 1
         content = ":star:"+str(count)+ " | " + c.mention
-        try:
-            await message.edit(content=content, embed=em)
-        except:
-            return
+        await message.edit(content=content, embed=em)
         await self.bot.db.execute("UPDATE starboard SET stars=$1 WHERE starboard_message_id=$2", count, message_data["starboard_message_id"])
         await self.bot.db.execute("UPDATE starrers SET starrers=$1 WHERE message_id=$2", new_starrers, message_id)
         await ctx.send("Message Starred.")
@@ -293,6 +266,8 @@ class Star(commands.Cog):
     @star.command()
     async def start(self, ctx, channel:discord.TextChannel, needed:int=3):
         '''Starts the starboard in the channel provided with the given amount of stars needed'''
+        if not ctx.author.guild_permissions.administrator:
+            return
         channel_data = await self.bot.db.fetchrow("SELECT * FROM star_channels WHERE guild_id=$1", ctx.guild.id)
         if channel_data:
             return await ctx.send("You already have a starboard channel set up, use the star delete command to start over.")
@@ -302,6 +277,8 @@ class Star(commands.Cog):
     @star.command()
     async def delete(self, ctx):
         '''Stops running a starboard in this guild.'''
+        if not ctx.author.guild_permissions.administrator:
+            return
         channel_data = await self.bot.db.fetchrow("SELECT * FROM star_channels WHERE guild_id=$1", ctx.guild.id)
         if not channel_data:
             return await ctx.send("You don't have a starboard channel in this guild, use the start command to make one.")
@@ -311,6 +288,8 @@ class Star(commands.Cog):
     @star.command()
     async def needed(self, ctx, needed:int=3):
         '''Changes how many stars are needed to star a message.'''
+        if not ctx.author.guild_permissions.administrator:
+            return
         channel_data = await self.bot.db.fetchrow("SELECT * FROM star_channels WHERE guild_id=$1", ctx.guild.id)
         if not channel_data:
             return await ctx.send("You don't have a starboard channel in this guild, use the start command to make one.")
