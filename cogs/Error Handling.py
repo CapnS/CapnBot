@@ -91,7 +91,7 @@ class CommandErrorHandler(commands.Cog):
             if "rob" in ctx.message.content:
                 return await ctx.send("This command is on cooldown")
         
-        elif isinstance(error, commands.errors.MissingPermissions):
+        elif isinstance(error, commands.MissingPermissions):
             if ctx.author == ctx.bot.owner:
                 return await ctx.reinvoke()
             missing = "\n".join(error.missing_perms)
