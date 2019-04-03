@@ -26,7 +26,7 @@ class BotInfo(commands.Cog):
         em = discord.Embed(title="Suggestion",description = "In the server " + ctx.guild.name,color = blurple)
         em.add_field(name=suggestion,value=f"[Jump]({ctx.message.jump_url})")
         em.set_footer(text="From " + ctx.author.name, icon_url=ctx.author.avatar_url)
-        capn = await self.bot.get_user_info(422181415598161921)
+        capn = self.bot.get_user(422181415598161921)
         await capn.send(embed=em)
         await ctx.send("Your suggestion has been sent.")
     
@@ -63,7 +63,7 @@ class BotInfo(commands.Cog):
         for guild in self.bot.guilds:
             all_guilds.append(guild)
         total_members = sum(1 for _ in self.bot.get_all_members())
-        capn = await self.bot.get_user_info(422181415598161921)
+        capn = self.bot.get_user(422181415598161921)
         dir_path = os.path.dirname(os.path.realpath(__file__))
         length=0
         for f in os.listdir(dir_path):
@@ -74,11 +74,7 @@ class BotInfo(commands.Cog):
                     lines = b.readlines()
                     length+=len(lines)
         dir_path = os.path.dirname(dir_path)
-        try:
-            repo = git.Repo(dir_path)
-        except:
-            repo = git.Repo(r"/home/zachary/CapnBot.git")
-        print(dir_path)
+        repo = git.Repo(r"/home/zachary/CapnBot.git")
         commit = repo.head.commit.message    
         em = discord.Embed(title = "Bot Info", description = f"[Bot Invite](https://discordapp.com/oauth2/authorize?&client_id={self.bot.user.id}&scope=bot&permissions=8) | [Support Server](https://discord.gg/5ZGbuGq) | [Source Code](https://github.com/CapnS/CapnBot) | [Patreon](https://www.patreon.com/capn) | [DBL](https://discordbots.org/bot/448915931507458048)")
         em.color = discord.Color.gold()
