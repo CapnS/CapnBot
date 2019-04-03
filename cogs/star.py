@@ -290,6 +290,8 @@ class Star(commands.Cog):
         '''Changes how many stars are needed to star a message.'''
         if not ctx.author.guild_permissions.administrator:
             return
+        if needed <= 0:
+            return await ctx.send("You need to have at least one star necessary.")
         channel_data = await self.bot.db.fetchrow("SELECT * FROM star_channels WHERE guild_id=$1", ctx.guild.id)
         if not channel_data:
             return await ctx.send("You don't have a starboard channel in this guild, use the start command to make one.")
