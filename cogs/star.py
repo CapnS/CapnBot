@@ -282,7 +282,7 @@ class Star(commands.Cog):
         em = message.embeds[0]
         count = len(new_starrers)
         star = self.get_star(count)
-        content = star+str(count)+ " | " + +message.content.split(" | ")[1]
+        content = star+str(count)+ " | " + message.content.split(" | ")[1]
         await message.edit(content=content, embed=em)
         await self.bot.db.execute("UPDATE starboard SET stars=$1 WHERE starboard_message_id=$2", count, message_data["starboard_message_id"])
         await self.bot.db.execute("UPDATE starrers SET starrers=$1 WHERE message_id=$2", new_starrers, message_id)
