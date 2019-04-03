@@ -91,6 +91,12 @@ class CommandErrorHandler(commands.Cog):
             if "rob" in ctx.message.content:
                 return await ctx.send("This command is on cooldown")
         
+        elif isinstance(error, commands.errors.MissingPermissions):
+            if ctx.author == ctx.bot.owner:
+                return await ctx.reinvoke()
+            missing = "\n".join(error.missing_perms)
+            return await ctx.send("You are missing the following permission/s, which is/are required to use this command:\n"+ missing)
+        
         await ctx.message.add_reaction("\U0000274c")
         print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)

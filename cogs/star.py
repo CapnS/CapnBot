@@ -288,6 +288,7 @@ class Star(commands.Cog):
     
     @star.command()
     @commands.guild_only()
+    @commands.has_permissions(manage_messages=True)
     async def remove(self, ctx, message_id:int):
         '''Removes a message from the starboard'''
         if not ctx.author.guild_permissions.administrator:
@@ -300,8 +301,9 @@ class Star(commands.Cog):
             await self.bot.db.execute("DELETE FROM star_channels WHERE channel_id=$1", channel_data["channel_id"])
             await self.bot.db.execute("DELETE FROM starboard WHERE channel_id=$1", channel_data["channel_id"])
             return await ctx.send("The starboard channel for this guild was not found.")
-        message = await channel.fetch_message(message_id)
-        if not message:
+        try:
+            message = await channel.fetch_message(message_id)
+        except:
             return await ctx.send("That message id does not correlate to a message in the starboard channel.")
         await message.delete()
         data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE starboard_message_id=$1", message_id)
@@ -317,6 +319,7 @@ class Star(commands.Cog):
         
     @star.command()
     @commands.guild_only()
+    @commands.has_permissions(manage_channels=True)
     async def start(self, ctx, channel:discord.TextChannel, needed:int=3):
         '''Starts the starboard in the channel provided with the given amount of stars needed'''
         if not ctx.author.guild_permissions.administrator:
@@ -329,6 +332,7 @@ class Star(commands.Cog):
 
     @star.command()
     @commands.guild_only()
+    @commands.has_permissions(manage_channels=True)
     async def delete(self, ctx):
         '''Stops running a starboard in this guild.'''
         if not ctx.author.guild_permissions.administrator:
@@ -343,6 +347,7 @@ class Star(commands.Cog):
 
     @star.command()
     @commands.guild_only()
+    @commands.has_permissions(manage_channels=True)
     async def needed(self, ctx, needed:int=3):
         '''Changes how many stars are needed to star a message.'''
         if not ctx.author.guild_permissions.administrator:
