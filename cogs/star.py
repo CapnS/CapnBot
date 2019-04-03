@@ -96,7 +96,7 @@ class Star(commands.Cog):
                     return
                 count = len(new_starrers)
                 star = self.get_star(count)
-                content = star+str(count)+ " | "+channel.mention
+                content = star+str(count)+ " | "+c.mention
                 message = await channel.send(content, embed=em)
                 await self.bot.db.execute("INSERT INTO starboard VALUES($1, $2, $3, $4, $5)", payload.message_id, message.id, message.channel.id, count, m.author.id)
                 await self.bot.db.execute("UPDATE starrers SET starrers=$1 WHERE message_id=$2", new_starrers, payload.message_id)
@@ -117,7 +117,7 @@ class Star(commands.Cog):
         em = message.embeds[0]
         count = len(new_starrers)
         star = self.get_star(count)
-        content = star+str(count)+ " | " + c.mention
+        content = star+str(count)+ " | " + message.content.split(" | ")[1]
         await message.edit(content=content, embed=em)
         await self.bot.db.execute("UPDATE starboard SET stars=$1 WHERE starboard_message_id=$2", count, message_data["starboard_message_id"])
         await self.bot.db.execute("UPDATE starrers SET starrers=$1 WHERE message_id=$2", new_starrers, payload.message_id)
@@ -181,7 +181,8 @@ class Star(commands.Cog):
         em = message.embeds[0]
         count = len(new_starrers)
         star = self.get_star(count)
-        content = star+str(count)+ " | " + c.mention
+
+        content = star+str(count)+ " | " + message.content.split(" | ")[1]
         await message.edit(content=content, embed=em)
         await self.bot.db.execute("UPDATE starboard SET stars=$1 WHERE starboard_message_id=$2", count, message_data["starboard_message_id"])
         await self.bot.db.execute("UPDATE starrers SET starrers=$1 WHERE message_id=$2", new_starrers, message_data["original_message_id"])
@@ -260,7 +261,7 @@ class Star(commands.Cog):
                 channel = self.bot.get_channel(channel_data["channel_id"])
                 count = len(new_starrers)
                 star = self.get_star(count)
-                content = star+str(count)+ " | "+channel.mention
+                content = star+str(count)+ " | "+message.content.split(" | ")[1]
                 message = await channel.send(content, embed=em)
                 await self.bot.db.execute("UPDATE starrers SET starrers=$1 WHERE message_id=$2", new_starrers, message_id)
                 await self.bot.db.execute("INSERT INTO starboard VALUES($1, $2, $3, $4, $5)", message_id, message.id, channel.id, count, m.author.id)
