@@ -178,6 +178,7 @@ class Star(commands.Cog):
         await self.bot.db.execute("DELETE FROM givers WHERE user_id=$1 AND guild_id=$2 AND message_id=$3", payload.user_id, payload.guild_id, payload.message_id)
 
     @commands.group(invoke_without_command=True)
+    @commands.guild_only()
     async def star(self, ctx, message_id:int):
         '''Manually stars a message'''
         channel_data = await self.bot.db.fetchrow("SELECT * FROM star_channels WHERE guild_id=$1", ctx.guild.id)
@@ -271,6 +272,7 @@ class Star(commands.Cog):
         await ctx.send("Message Starred.")
     
     @star.command()
+    @commands.guild_only()
     async def remove(self, ctx, message_id:int):
         '''Removes a message from the starboard'''
         if not ctx.author.guild_permissions.administrator:
@@ -299,6 +301,7 @@ class Star(commands.Cog):
 
         
     @star.command()
+    @commands.guild_only()
     async def start(self, ctx, channel:discord.TextChannel, needed:int=3):
         '''Starts the starboard in the channel provided with the given amount of stars needed'''
         if not ctx.author.guild_permissions.administrator:
@@ -310,6 +313,7 @@ class Star(commands.Cog):
         await ctx.send("Starboard has been started in "+channel.mention+" with "+str(needed)+" stars needed to star a message.")
 
     @star.command()
+    @commands.guild_only()
     async def delete(self, ctx):
         '''Stops running a starboard in this guild.'''
         if not ctx.author.guild_permissions.administrator:
@@ -323,6 +327,7 @@ class Star(commands.Cog):
         await ctx.send("Starboard has been stopped.")
 
     @star.command()
+    @commands.guild_only()
     async def needed(self, ctx, needed:int=3):
         '''Changes how many stars are needed to star a message.'''
         if not ctx.author.guild_permissions.administrator:
@@ -336,6 +341,7 @@ class Star(commands.Cog):
         await ctx.send("Starboard has been edited.")
 
     @star.command()
+    @commands.guild_only()
     async def show(self, ctx, message_id:int):
         '''Shows the starred message for the id'''
         channel_data = await self.bot.db.fetchrow("SELECT * FROM star_channels WHERE guild_id=$1", ctx.guild.id)
@@ -355,6 +361,7 @@ class Star(commands.Cog):
         await ctx.send(m.content, embed=m.embeds[0])
 
     @star.command()
+    @commands.guild_only()
     async def random(self, ctx):
         '''Shows a random starboard message'''
         channel_data = await self.bot.db.fetchrow("SELECT * FROM star_channels WHERE guild_id=$1", ctx.guild.id)
@@ -377,6 +384,7 @@ class Star(commands.Cog):
         await ctx.send(m.content, embed=m.embeds[0])
 
     @star.command()
+    @commands.guild_only()
     async def stats(self, ctx):
         '''Shows star stats for this guild'''
         channel_data = await self.bot.db.fetchrow("SELECT * FROM star_channels WHERE guild_id=$1", ctx.guild.id)
