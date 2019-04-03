@@ -73,6 +73,10 @@ class Star(commands.Cog):
                 em.set_author(name=m.author.name, icon_url=m.author.avatar_url)
                 em.timestamp = m.created_at
                 channel = self.bot.get_channel(channel_data["channel_id"])
+                if not channel:
+                    await self.bot.db.execute("DELETE FROM star_channels WHERE channel_id=$1", channel_data["channel_id"])
+                    await self.bot.db.execute("DELETE FROM starboard WHERE channel_id=$1", channel_data["channel_id"])
+                    return
                 count = len(new_starrers)
                 content = ":star:"+str(count)+ " | "+channel.mention
                 message = await channel.send(content, embed=em)
@@ -82,7 +86,15 @@ class Star(commands.Cog):
         if payload.user_id == message_data["author_id"]:
             return
         c = self.bot.get_channel(message_data["channel_id"])
-        message = await c.fetch_message(message_data["starboard_message_id"])
+        if not c:
+            await self.bot.db.execute("DELETE FROM star_channels WHERE channel_id=$1", channel_data["channel_id"])
+            await self.bot.db.execute("DELETE FROM starboard WHERE channel_id=$1", channel_data["channel_id"])
+            return await ctx.send("The starboard channel for this guild was not found.")
+        try:
+            message = await c.fetch_message(message_data["starboard_message_id"])
+        except:
+            await self.bot.db.execute("DELETE FROM starboard WHERE starboard_message_id=$1", message_data["starboard_message_id"])
+            return 
         em = message.embeds[0]
         count = message_data["stars"] + 1
         content = ":star:"+str(count)+ " | " + c.mention
@@ -234,7 +246,15 @@ class Star(commands.Cog):
         if ctx.author.id == message_data["author_id"]:
             return await ctx.send("You can't star your own message.")
         c = self.bot.get_channel(message_data["channel_id"])
-        message = await c.fetch_message(message_data["starboard_message_id"])
+        if not c:
+            await self.bot.db.execute("DELETE FROM star_channels WHERE channel_id=$1", channel_data["channel_id"])
+            await self.bot.db.execute("DELETE FROM starboard WHERE channel_id=$1", channel_data["channel_id"])
+            return await ctx.send("The starboard channel for this guild was not found.")
+        try:
+            message = await c.fetch_message(message_data["starboard_message_id"])
+        except:
+            await self.bot.db.execute("DELETE FROM starboard WHERE starboard_message_id=$1", message_data["starboard_message_id"])
+            return
         em = message.embeds[0]
         count = message_data["stars"] + 1
         content = ":star:"+str(count)+ " | " + c.mention
@@ -252,6 +272,10 @@ class Star(commands.Cog):
         if not channel_data:
             return await ctx.send("This guild doesnt have a starboard channel set up. You should set one up now.")
         channel = self.bot.get_channel(channel_data["channel_id"])
+        if not channel:
+            await self.bot.db.execute("DELETE FROM star_channels WHERE channel_id=$1", channel_data["channel_id"])
+            await self.bot.db.execute("DELETE FROM starboard WHERE channel_id=$1", channel_data["channel_id"])
+            return await ctx.send("The starboard channel for this guild was not found.")
         message = await channel.fetch_message(message_id)
         if not message:
             return await ctx.send("That message id does not correlate to a message in the starboard channel.")
@@ -283,6 +307,7 @@ class Star(commands.Cog):
         if not channel_data:
             return await ctx.send("You don't have a starboard channel in this guild, use the start command to make one.")
         await self.bot.db.execute("DELETE FROM star_channels WHERE guild_id=$1", ctx.guild.id)
+        await self.bot.db.execute("DELETE FROM starboard WHERE channel_id=$1", channeld_data["channel_id"])
         await ctx.send("Starboard has been stopped.")
 
     @star.command()
@@ -306,9 +331,14 @@ class Star(commands.Cog):
             return await ctx.send("This guild doesn't have a starboard set up.")
         else:
             c = self.bot.get_channel(channel_data["channel_id"])
+            if not c:
+                await self.bot.db.execute("DELETE FROM star_channels WHERE channel_id=$1", channel_data["channel_id"])
+                await self.bot.db.execute("DELETE FROM starboard WHERE channel_id=$1", channel_data["channel_id"])
+                return await ctx.send("The starboard channel for this guild was not found.")
             try:
                 m = await c.fetch_message(message_id)
             except:
+                await self.bot.db.execute("DELETE FROM starboard WHERE starboard_message_id=$1", message_id)
                 return await ctx.send("That message was not found.")
         await ctx.send(m.content, embed=m.embeds[0])
 
@@ -323,7 +353,15 @@ class Star(commands.Cog):
             return await ctx.send("There are no starred messages in this guild.")
         else:
             c = self.bot.get_channel(channel_data["channel_id"])
-            m = await c.fetch_message(message_data["message_id"])
+            if not c:
+                await self.bot.db.execute("DELETE FROM star_channels WHERE channel_id=$1", channel_data["channel_id"])
+                await self.bot.db.execute("DELETE FROM starboard WHERE channel_id=$1", channel_data["channel_id"])
+                return await ctx.send("The starboard channel for this guild was not found.")
+            try:
+                m = await c.fetch_message(message_data["starboard_message_id"])
+            except:
+                await self.bot.db.execute("DELETE FROM starboard WHERE starboard_message_id=$1", message_data["starboard_message_id"])
+                return await ctx.send("This command errored, try again.")
         await ctx.send(m.content, embed=m.embeds[0])
 
     @star.command()
@@ -332,23 +370,34 @@ class Star(commands.Cog):
         channel_data = await self.bot.db.fetchrow("SELECT * FROM star_channels WHERE guild_id=$1", ctx.guild.id)
         if not channel_data:
             return await ctx.send("This guild doesn't have a starboard set up.")
-        star_data = await self.bot.db.fetchrow("SELECT COUNT(message_id) AS messages, SUM(stars) AS stars FROM starboard WHERE channel_id=$1", channel_data["channel_id"])
-        top_3_messages = await self.bot.db.fetch("SELECT * FROM starboard WHERE channel_id=$1 ORDER BY stars LIMIT 3", channel_data["channel_id"])
-        top_3_authors = await self.bot.db.fetch("SELECT author_id, SUM(stars) as stars FROM starboard WHERE channel_id=$1 GROUP BY author_id ORDER BY sum(stars) LIMIT 3", channel_data["channel_id"])
+        star_data = await self.bot.db.fetchrow("SELECT COUNT(starboard_message_id) AS messages, SUM(stars) AS stars FROM starboard WHERE channel_id=$1", channel_data["channel_id"])
+        top_3_messages = await self.bot.db.fetch("SELECT * FROM starboard WHERE channel_id=$1 ORDER BY stars DESC LIMIT 3", channel_data["channel_id"])
+        top_3_authors = await self.bot.db.fetch("SELECT author_id, SUM(stars) as stars FROM starboard WHERE channel_id=$1 GROUP BY author_id ORDER BY sum(stars) DESC LIMIT 3", channel_data["channel_id"])
         desc = str(star_data["messages"]) + " starred messages with a total of " + str(star_data["stars"]) + " stars."
         color = discord.Color.gold()
         top_messages = ""
         c = self.bot.get_channel(channel_data["channel_id"])
+        if not c:
+            await self.bot.db.execute("DELETE FROM star_channels WHERE channel_id=$1", channel_data["channel_id"])
+            await self.bot.db.execute("DELETE FROM starboard WHERE channel_id=$1", channel_data["channel_id"])
+            return await ctx.send("The starboard channel for this guild was not found.")
         for msg in top_3_messages:
-            m = await c.fetch_message(msg["starboard_message_id"])
-            line = " - [Message]("+m.jump_url+") : :star:"+msg["stars"]+"\n"
+            try:
+                m = await c.fetch_message(msg["starboard_message_id"])
+            except:
+                await self.bot.db.execute("DELETE FROM starboard WHERE starboard_message_id=$1", msg["starboard_message_id"])
+                line = " - MESSAGE NOT FOUND\n"
+            else:
+                line = " - ["+str(m.id)+"]("+m.jump_url+") : :star:"+str(msg["stars"])+"\n"
             top_messages+=line
         top_authors = ""
         for author in top_3_authors:
-            user = ctx.guild.get_user(author["author_id"])
+            user = self.bot.get_user(author["author_id"])
             if not user:
-                continue
-            line = " - " + user.mention + " : :star:"+author["stars"]+"\n"
+                await self.bot.db.execute("DELETE FROM starboard WHERE author_id=$1", author["author_id"])
+                line = " - USER NOT FOUND\n"
+            else:
+                line = " - " + user.mention + " : :star:"+str(author["stars"])+"\n"
             top_authors+=line
         em = discord.Embed(title="Star Stats", description=desc, color=color)
         em.add_field(name="Top 3 Starred Messages", value=top_messages, inline=False)
