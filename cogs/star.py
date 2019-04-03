@@ -261,7 +261,7 @@ class Star(commands.Cog):
                 channel = self.bot.get_channel(channel_data["channel_id"])
                 count = len(new_starrers)
                 star = self.get_star(count)
-                content = star+str(count)+ " | "+m.content.split(" | ")[1]
+                content = star+str(count)+ " | "+c.mention
                 message = await channel.send(content, embed=em)
                 await self.bot.db.execute("UPDATE starrers SET starrers=$1 WHERE message_id=$2", new_starrers, message_id)
                 await self.bot.db.execute("INSERT INTO starboard VALUES($1, $2, $3, $4, $5)", message_id, message.id, channel.id, count, m.author.id)
