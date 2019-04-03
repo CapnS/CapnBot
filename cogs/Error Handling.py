@@ -26,39 +26,6 @@ class CommandErrorHandler(commands.Cog):
             return 
         elif isinstance(error, discord.Forbidden):
             return
-        '''
-        if isinstance(error, commands.CommandNotFound):
-            command_list = []
-            msg = ""
-            for char in ctx.message.content:
-                if char == " ":
-                    break
-                else:
-                    msg = f'{msg}{char}'
-            guild_prefixes = prefixes.get(str(ctx.guild.id), ["!","alexa"])
-            for prefix in guild_prefixes:
-                if msg in prefix:
-                    i=0
-                    for char in ctx.message.content:
-                        if char == " ":
-                            if i==0:
-                                msg = ""
-                                i+=1
-                            else:
-                                break
-                        else:
-                            msg = f'{msg}{char}'
-            await ctx.send(f"The Command {msg} was not found")
-            for command in self.bot.commands:
-                command_list.append(command.name)
-            matches = difflib.get_close_matches(msg,command_list)
-            if matches:
-                await ctx.send("``Did you mean:``")
-                for match in matches:
-                    await ctx.send(f"``{match}``")
-            return
-        '''
-
         if isinstance(error, commands.CommandOnCooldown):
             time = round(error.retry_after/3600,1)
             return await ctx.send(f"You have to wait {time} hours to use this command")
@@ -83,13 +50,6 @@ class CommandErrorHandler(commands.Cog):
 
         elif isinstance(error, commands.BadArgument):
             return await ctx.send('I could not find that member. Please try again.')
-        
-
-        elif isinstance(error, commands.errors.CheckFailure):
-            if ctx.message.content.startswith("!stop"):
-                return 
-            if "rob" in ctx.message.content:
-                return await ctx.send("This command is on cooldown")
         
         elif isinstance(error, commands.MissingPermissions):
             if ctx.author == ctx.bot.owner:
