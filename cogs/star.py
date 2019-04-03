@@ -306,7 +306,7 @@ class Star(commands.Cog):
         await message.delete()
         data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE starboard_message_id=$1", message_id)
         message_id = data["original_message_id"]
-        starrers = await self.bot.db.fetchrow("SELECT * FROM starrers WHERE message_id=$1", message_id)
+        starrers = await self.bot.db.fetch("SELECT * FROM starrers WHERE message_id=$1", message_id)
         for starrer in starrers:
             for user_id in starrer["starrers"]:
                 await self.bot.db.execute("DELETE FROM givers WHERE user_id=$1 AND guild_id=$2", user_id, ctx.guild.id)
