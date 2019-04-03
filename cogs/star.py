@@ -16,6 +16,14 @@ class Star(commands.Cog):
         channel_data = await self.bot.db.fetchrow("SELECT * FROM star_channels WHERE guild_id=$1", payload.guild_id)
         if not channel_data:
             return
+        else:
+            current_channel = self.bot.get_channel(payload.channel_id)
+            starboard_channel = self.bot.get_channel(channel_data["channel_id"])
+            if current_channel.is_nsfw() and not starboard_channel.is_nsfw():
+                return 
+        user = self.bot.get_user(payload.user_id)
+        if user.bot:
+            return
         starrers = await self.bot.db.fetchrow("SELECT * FROM starrers WHERE message_id=$1", payload.message_id)
         if not starrers:
             starboard_data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE starboard_message_id=$1", payload.message_id)
@@ -35,6 +43,13 @@ class Star(commands.Cog):
         m = await c.fetch_message(payload.message_id)
         if not m:
             return
+        try:
+            new_starrers = old_starrers
+        except:
+            if channel_data["needed"] != 1:
+                new_starrers = [payload.user_id]
+                await self.bot.db.execute("INSERT INTO starrers VALUES ($1, $2)", payload.message_id, new_starrers)
+                return
         message_data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE original_message_id=$1", payload.message_id)
         if not message_data:
             message_data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE starboard_message_id=$1", payload.message_id)
@@ -67,7 +82,6 @@ class Star(commands.Cog):
                     message = await channel.send(content, embed=em)
                 except:
                     return
-                new_starrers = [payload.user_id]
                 await self.bot.db.execute("INSERT INTO starboard VALUES($1, $2, $3, $4)", payload.message_id, message.id, message.channel.id, count)
                 await self.bot.db.execute("INSERT INTO starrers VALUES ($1, $2)", payload.message_id, new_starrers)
                 return
@@ -114,6 +128,9 @@ class Star(commands.Cog):
             return
         channel_data = await self.bot.db.fetchrow("SELECT * FROM star_channels WHERE guild_id=$1", payload.guild_id)
         if not channel_data:
+            return
+        user = self.bot.get_user(payload.user_id)
+        if user.bot:
             return
         starrers = await self.bot.db.fetchrow("SELECT * FROM starrers WHERE message_id=$1", payload.message_id)
         if not starrers:
@@ -187,6 +204,11 @@ class Star(commands.Cog):
         channel_data = await self.bot.db.fetchrow("SELECT * FROM star_channels WHERE guild_id=$1", ctx.guild.id)
         if not channel_data:
             return await ctx.send("You don't have a starboard setup, ask an admin to set one up for this guild.")
+        else:
+            current_channel = self.bot.get_channel(payload.channel_id)
+            starboard_channel = self.bot.get_channel(channel_data["channel_id"])
+            if current_channel.is_nsfw() and not starboard_channel.is_nsfw():
+                return 
         starrers = await self.bot.db.fetchrow("SELECT * FROM starrers WHERE message_id=$1", message_id)
         if not starrers:
             starboard_data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE starboard_message_id=$1", message_id)
@@ -206,6 +228,13 @@ class Star(commands.Cog):
             m = await c.fetch_message(message_id)
             if not m:
                 return await ctx.send("That message was not sent in this channel or in the starboard channel.")
+        try:
+            new_starrers = old_starrers
+        except:
+            if channel_data["needed"] != 1:
+                new_starrers = [ctx.author.id]
+                await self.bot.db.execute("INSERT INTO starrers VALUES ($1, $2)", message_id, new_starrers)
+                return
         message_data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE original_message_id=$1", message_id)
         if not message_data:
             message_data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE starboard_message_id=$1", message_id)
@@ -242,7 +271,6 @@ class Star(commands.Cog):
                     message = await channel.send(content, embed=em)
                 except:
                     return
-                new_starrers = [ctx.author.id]
                 await self.bot.db.execute("INSERT INTO starrers VALUES ($1, $2)", message_id, new_starrers)
                 await self.bot.db.execute("INSERT INTO starboard VALUES($1, $2, $3, $4)", message_id, message.id, channel.id, count)
                 return
@@ -254,7 +282,7 @@ class Star(commands.Cog):
                         return
                     else:
                         new_starrers = old_starrers.append(ctx.author.id)
-        if message_data["stars"] < channel_data["needed"]:
+        if message_data["stars"] + 1 < channel_data["needed"]:
             if starrers:
                 new_starrers = old_starrers.append(ctx.author.id)
                 await self.bot.db.execute("UPDATE starrers SET starrers=$1 WHERE message_id=$2", new_starrers, message_id)
