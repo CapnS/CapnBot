@@ -298,5 +298,62 @@ class Star(commands.Cog):
         await self.bot.db.execute("UPDATE star_channels SET needed=$1 WHERE guild_id=$2", needed, ctx.guild.id)
         await ctx.send("Starboard has been edited.")
 
+    @star.command()
+    async def show(self, ctx, message_id:int):
+        '''Shows the starred message for the id'''
+        channel_data = await self.bot.db.fetchrow("SELECT * FROM star_channels WHERE guild_id=$1", ctx.guild.id)
+        if not channel_data:
+            return await ctx.send("This guild doesn't have a starboard set up.")
+        else:
+            c = self.bot.get_channel(channel_data["channel_id"])
+            try:
+                m = await c.fetch_message(message_id)
+            except:
+                return await ctx.send("That message was not found.")
+        await ctx.send(m.content, embed=m.embeds[0])
+
+    @star.command()
+    async def random(self, ctx):
+        '''Shows a random starboard message'''
+        channel_data = await self.bot.db.fetchrow("SELECT * FROM star_channels WHERE guild_id=$1", ctx.guild.id)
+        if not channel_data:
+            return await ctx.send("This guild doesn't have a starboard set up.")
+        message_data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE channel_id=$1 OFFSET FLOOR(RANDOM() * (SELECT COUNT(*) FROM starboard WHERE channel_id=$1)) LIMIT 1", channel_data["channel_id"])
+        if not message_data:
+            return await ctx.send("There are no starred messages in this guild.")
+        else:
+            c = self.bot.get_channel(channel_data["channel_id"])
+            m = await c.fetch_message(message_data["message_id"])
+        await ctx.send(m.content, embed=m.embeds[0])
+
+    @star.command()
+    async def stats(self, ctx):
+        '''Shows star stats for this guild'''
+        channel_data = await self.bot.db.fetchrow("SELECT * FROM star_channels WHERE guild_id=$1", ctx.guild.id)
+        if not channel_data:
+            return await ctx.send("This guild doesn't have a starboard set up.")
+        star_data = await self.bot.db.fetchrow("SELECT COUNT(message_id) AS messages, SUM(stars) AS stars FROM starboard WHERE channel_id=$1", channel_data["channel_id"])
+        top_3_messages = await self.bot.db.fetch("SELECT * FROM starboard WHERE channel_id=$1 ORDER BY stars LIMIT 3", channel_data["channel_id"])
+        top_3_authors = await self.bot.db.fetch("SELECT author_id, SUM(stars) as stars FROM starboard WHERE channel_id=$1 GROUP BY author_id ORDER BY sum(stars) LIMIT 3", channel_data["channel_id"])
+        desc = str(star_data["messages"]) + " starred messages with a total of " + str(star_data["stars"]) + " stars."
+        color = discord.Color.gold()
+        top_messages = ""
+        c = self.bot.get_channel(channel_data["channel_id"])
+        for msg in top_3_messages:
+            m = await c.fetch_message(msg["starboard_message_id"])
+            line = " - [Message]("+m.jump_url+") : :star:"+msg["stars"]+"\n"
+            top_messages+=line
+        top_authors = ""
+        for author in top_3_authors:
+            user = ctx.guild.get_user(author["author_id"])
+            if not user:
+                continue
+            line = " - " + user.mention + " : :star:"+author["stars"]+"\n"
+            top_authors+=line
+        em = discord.Embed(title="Star Stats", description=desc, color=color)
+        em.add_field(name="Top 3 Starred Messages", value=top_messages, inline=False)
+        em.add_field(name="Top 3 Starred Users", value=top_authors, inline=False)
+        await ctx.send(embed=em)
+
 def setup(bot):
     bot.add_cog(Star(bot))
