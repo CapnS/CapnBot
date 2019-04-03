@@ -9,7 +9,7 @@ class Star(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
-    async def get_star(self, count):
+    def get_star(self, count):
         if count < 5:
             return ":star:"
         elif count < 10:
