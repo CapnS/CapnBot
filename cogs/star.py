@@ -48,6 +48,7 @@ class Star(commands.Cog):
             new_starrers = [payload.user_id]
             if channel_data["needed"] != 1:
                 await self.bot.db.execute("INSERT INTO starrers VALUES ($1, $2)", payload.message_id, new_starrers)
+                await self.bot.db.execute("INSERT INTO givers VALUES ($1, $2)", payload.user_id, payload.guild_id)
                 return
         message_data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE original_message_id=$1", payload.message_id)
         if not message_data:
@@ -82,6 +83,7 @@ class Star(commands.Cog):
                 message = await channel.send(content, embed=em)
                 await self.bot.db.execute("INSERT INTO starboard VALUES($1, $2, $3, $4, $5)", payload.message_id, message.id, message.channel.id, count, m.author.id)
                 await self.bot.db.execute("INSERT INTO starrers VALUES ($1, $2)", payload.message_id, new_starrers)
+                await self.bot.db.execute("INSERT INTO givers VALUES ($1, $2)", payload.user_id, payload.guild_id)
                 return
         if payload.user_id == message_data["author_id"]:
             return
@@ -89,7 +91,7 @@ class Star(commands.Cog):
         if not c:
             await self.bot.db.execute("DELETE FROM star_channels WHERE channel_id=$1", channel_data["channel_id"])
             await self.bot.db.execute("DELETE FROM starboard WHERE channel_id=$1", channel_data["channel_id"])
-            return await ctx.send("The starboard channel for this guild was not found.")
+            return 
         try:
             message = await c.fetch_message(message_data["starboard_message_id"])
         except:
@@ -101,6 +103,7 @@ class Star(commands.Cog):
         await message.edit(content=content, embed=em)
         await self.bot.db.execute("UPDATE starboard SET stars=$1 WHERE starboard_message_id=$2", count, message_data["starboard_message_id"])
         await self.bot.db.execute("UPDATE starrers SET starrers=$1 WHERE message_id=$2", new_starrers, payload.message_id)
+        await self.bot.db.execute("INSERT INTO givers VALUES ($1, $2)", payload.user_id, payload.guild_id)
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
@@ -153,6 +156,7 @@ class Star(commands.Cog):
             else:
                 new_starrers = []
                 await self.bot.db.execute("INSERT INTO starrers VALUES ($1, $2)", payload.message_id, new_starrers)
+            await self.bot.db.execute("DELETE FROM givers WHERE user_id=$1 AND guild_id=$2 LIMIT 1", payload.user_id, payload.guild_id)
             message_data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE original_message_id=$1", payload.message_id)
             if not message_data:
                 message_data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE starboard_message_id=$1", payload.message_id)
@@ -171,6 +175,7 @@ class Star(commands.Cog):
         await message.edit(content=content, embed=em)
         await self.bot.db.execute("UPDATE starboard SET stars=$1 WHERE starboard_message_id=$2", count, message_data["starboard_message_id"])
         await self.bot.db.execute("UPDATE starrers SET starrers=$1 WHERE message_id=$2", new_starrers, message_data["original_message_id"])
+        await self.bot.db.execute("DELETE FROM givers WHERE user_id=$1 AND guild_id=$2 LIMIT 1", payload.user_id, payload.guild_id)
 
     @commands.group(invoke_without_command=True)
     async def star(self, ctx, message_id:int):
@@ -242,6 +247,7 @@ class Star(commands.Cog):
                 message = await channel.send(content, embed=em)
                 await self.bot.db.execute("INSERT INTO starrers VALUES ($1, $2)", message_id, new_starrers)
                 await self.bot.db.execute("INSERT INTO starboard VALUES($1, $2, $3, $4, $5)", message_id, message.id, channel.id, count, m.author.id)
+                await self.bot.db.execute("INSERT INTO givers VALUES ($1, $2)", ctx.author.id, ctx.guild.id)
                 return await ctx.send("Message Starred")
         if ctx.author.id == message_data["author_id"]:
             return await ctx.send("You can't star your own message.")
@@ -261,6 +267,7 @@ class Star(commands.Cog):
         await message.edit(content=content, embed=em)
         await self.bot.db.execute("UPDATE starboard SET stars=$1 WHERE starboard_message_id=$2", count, message_data["starboard_message_id"])
         await self.bot.db.execute("UPDATE starrers SET starrers=$1 WHERE message_id=$2", new_starrers, message_id)
+        await self.bot.db.execute("INSERT INTO givers VALUES ($1, $2)", ctx.author.id, ctx.guild.id)
         await ctx.send("Message Starred.")
     
     @star.command()
@@ -282,6 +289,10 @@ class Star(commands.Cog):
         await message.delete()
         data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE starboard_message_id=$1", message_id)
         message_id = data["original_message_id"]
+        starrers = await self.bot.db.fetchrow("SELECT * FROM starrers WHERE message_id=$1", message_id)
+        for starrer in starrers:
+            for user_id in starrer["starrers"]:
+                await self.bot.db.execute("DELETE FROM givers WHERE user_id=$1 AND guild_id=$2", user_id, ctx.guild.id)
         await self.bot.db.execute("DELETE FROM starboard WHERE original_message_id=$1", message_id)
         await self.bot.db.execute("DELETE FROM starrers WHERE message_id=$1", message_id)
         await ctx.send("Deleted message from starboard.")
@@ -307,7 +318,8 @@ class Star(commands.Cog):
         if not channel_data:
             return await ctx.send("You don't have a starboard channel in this guild, use the start command to make one.")
         await self.bot.db.execute("DELETE FROM star_channels WHERE guild_id=$1", ctx.guild.id)
-        await self.bot.db.execute("DELETE FROM starboard WHERE channel_id=$1", channeld_data["channel_id"])
+        await self.bot.db.execute("DELETE FROM starboard WHERE channel_id=$1", channel_data["channel_id"])
+        await self.bot.db.execute("DELETE FROM givers WHERE guild_id=$1", ctx.guild.id)
         await ctx.send("Starboard has been stopped.")
 
     @star.command()
@@ -373,6 +385,7 @@ class Star(commands.Cog):
         star_data = await self.bot.db.fetchrow("SELECT COUNT(starboard_message_id) AS messages, SUM(stars) AS stars FROM starboard WHERE channel_id=$1", channel_data["channel_id"])
         top_3_messages = await self.bot.db.fetch("SELECT * FROM starboard WHERE channel_id=$1 ORDER BY stars DESC LIMIT 3", channel_data["channel_id"])
         top_3_authors = await self.bot.db.fetch("SELECT author_id, SUM(stars) as stars FROM starboard WHERE channel_id=$1 GROUP BY author_id ORDER BY sum(stars) DESC LIMIT 3", channel_data["channel_id"])
+        top_3_givers = await self.bot.db.fetch("SELECT user_id, count(user_id) as stars FROM givers WHERE guild_id=$1 GROUP BY user_id ORDER BY count(user_id) DESC LIMIT 3", ctx.guild.id)
         desc = str(star_data["messages"]) + " starred messages with a total of " + str(star_data["stars"]) + " stars."
         color = discord.Color.gold()
         top_messages = ""
@@ -399,9 +412,18 @@ class Star(commands.Cog):
             else:
                 line = " - " + user.mention + " : :star:"+str(author["stars"])+"\n"
             top_authors+=line
+        top_givers = ""
+        for giver in top_3_givers:
+            user = self.bot.get_user(giver["user_id"])
+            if not user:
+                line = " - USER NOT FOUND\n"
+            else:
+                line = " - " + user.mention + " : :star:"+str(giver["stars"])+"\n"
+            top_givers+=line
         em = discord.Embed(title="Star Stats", description=desc, color=color)
         em.add_field(name="Top 3 Starred Messages", value=top_messages, inline=False)
         em.add_field(name="Top 3 Starred Users", value=top_authors, inline=False)
+        em.add_field(name="Top 3 Star Givers", value=top_givers, inline=False)
         await ctx.send(embed=em)
 
 def setup(bot):
