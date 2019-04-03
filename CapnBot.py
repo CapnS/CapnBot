@@ -256,7 +256,7 @@ async def on_ready():
     await _get_owner()
     extensions = ["fun","duel","Roles","misc","regular","games","internet","Working Music", \
     "Error Handling","calculation","chatbot","fortnite", "bot", "twitter", "twitch", "tags", \
-    "images"]
+    "images", "star"]
     for extension in extensions:
         bot.load_extension("cogs."+extension)
     bot.load_extension('jishaku')
