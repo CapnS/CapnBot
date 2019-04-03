@@ -446,7 +446,10 @@ class Star(commands.Cog):
         em.add_field(name="Top 3 Starred Messages", value=top_messages, inline=False)
         em.add_field(name="Top 3 Starred Users", value=top_authors, inline=False)
         em.add_field(name="Top 3 Star Givers", value=top_givers, inline=False)
-        await ctx.send(embed=em)
+        try:
+            await ctx.send(embed=em)
+        except:
+            await ctx.send("There are no starred messages in this guild.")
 
 def setup(bot):
     bot.add_cog(Star(bot))
