@@ -291,8 +291,6 @@ class Star(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     async def remove(self, ctx, message_id:int):
         '''Removes a message from the starboard'''
-        if not ctx.author.guild_permissions.administrator:
-            return
         channel_data = await self.bot.db.fetchrow("SELECT * FROM star_channels WHERE guild_id=$1", ctx.guild.id)
         if not channel_data:
             return await ctx.send("This guild doesnt have a starboard channel set up. You should set one up now.")
@@ -322,8 +320,6 @@ class Star(commands.Cog):
     @commands.has_permissions(manage_channels=True)
     async def start(self, ctx, channel:discord.TextChannel, needed:int=3):
         '''Starts the starboard in the channel provided with the given amount of stars needed'''
-        if not ctx.author.guild_permissions.administrator:
-            return
         channel_data = await self.bot.db.fetchrow("SELECT * FROM star_channels WHERE guild_id=$1", ctx.guild.id)
         if channel_data:
             return await ctx.send("You already have a starboard channel set up, use the star delete command to start over.")
@@ -335,8 +331,6 @@ class Star(commands.Cog):
     @commands.has_permissions(manage_channels=True)
     async def delete(self, ctx):
         '''Stops running a starboard in this guild.'''
-        if not ctx.author.guild_permissions.administrator:
-            return
         channel_data = await self.bot.db.fetchrow("SELECT * FROM star_channels WHERE guild_id=$1", ctx.guild.id)
         if not channel_data:
             return await ctx.send("You don't have a starboard channel in this guild, use the start command to make one.")
@@ -350,8 +344,6 @@ class Star(commands.Cog):
     @commands.has_permissions(manage_channels=True)
     async def needed(self, ctx, needed:int=3):
         '''Changes how many stars are needed to star a message.'''
-        if not ctx.author.guild_permissions.administrator:
-            return
         if needed <= 0:
             return await ctx.send("You need to have at least one star necessary.")
         channel_data = await self.bot.db.fetchrow("SELECT * FROM star_channels WHERE guild_id=$1", ctx.guild.id)
