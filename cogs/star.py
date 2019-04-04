@@ -19,15 +19,21 @@ class Star(commands.Cog):
         else:
             return ":sparkles:"
 
-    async def get_starboard_channel(self, guild_id):
+    async def get_starboard_channel(self, guild_id, needed=False):
         channel = await self.bot.db.fetchrow("SELECT * FROM star_channels WHERE guild_id=$1", guild_id)
         if not channel:
-            return False, False
+            if needed:
+                return False, False
+            else:
+                return False
         else:
-            return channel["channel_id"], channel["needed"]
+            if needed:
+                return channel["channel_id"], channel["needed"]
+            else:
+                return channel["channel_id"]
 
     async def delete_starboard(self, ctx):
-        starboard_channel, needed = await self.get_starboard_channel(ctx.guild.id)
+        starboard_channel = await self.get_starboard_channel(ctx.guild.id)
         if not starboard_channel:
             return await ctx.send("You don't have a starboard setup, ask an admin to set one up for this guild.")
         await self.bot.db.execute("DELETE FROM star_channels WHERE guild_id=$1", ctx.guild.id)
@@ -42,13 +48,13 @@ class Star(commands.Cog):
             user = self.bot.get_user(user_id)
             if user.bot:
                 return
-            starboard_channel, needed = await self.get_starboard_channel(guild_id)
+            starboard_channel, needed = await self.get_starboard_channel(guild_id, True)
             if not starboard_channel:
                 return await ctx.send("You don't have a starboard setup, ask an admin to set one up for this guild.")
             else:
                 current_channel = self.bot.get_channel(channel_id)
-                starboard_channel = self.bot.get_channel(starboard_channel)
-                if current_channel.is_nsfw() and not starboard_channel.is_nsfw():
+                star_channel = self.bot.get_channel(starboard_channel)
+                if current_channel.is_nsfw() and not star_channel.is_nsfw():
                     return await ctx.send("You can't star in an NSFW channel if your starboard isn't NSFW.")
             starrers = await self.bot.db.fetchrow("SELECT * FROM starrers WHERE message_id=$1", message_id)
             if not starrers:
@@ -137,7 +143,7 @@ class Star(commands.Cog):
             await self.bot.db.execute("UPDATE starboard SET stars=$1 WHERE starboard_message_id=$2", count, message_data["starboard_message_id"])
             await self.update_starrers(new_starrers, message_id)
             await self.bot.db.execute("INSERT INTO givers VALUES ($1, $2, $3)", user_id, guild_id, message_id)
-            await ctx.send("Message Starred.") 
+            await ctx.send("Message Starred.")
         except AttributeError:
             pass
 
@@ -146,14 +152,16 @@ class Star(commands.Cog):
             user = self.bot.get_user(user_id)
             if user.bot:
                 return
-            starboard_channel, needed = await self.get_starboard_channel(guild_id)
+            starboard_channel, needed = await self.get_starboard_channel(guild_id, True)
             if not starboard_channel:
                 return await ctx.send("This guild does not have a starboard channel set up.")
             starrers = await self.bot.db.fetchrow("SELECT * FROM starrers WHERE message_id=$1", message_id)
+            starboard_message = None
             if not starrers:
                 starboard_data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE starboard_message_id=$1", message_id)
                 if starboard_data:
-                    starrers = await self.bot.db.fetchrow("SELECT * FROM starrers WHERE message_id=$1", starboard_data["original_message_id"])
+                    star_message = starboard_data["original_message_id"]
+                    starrers = await self.bot.db.fetchrow("SELECT * FROM starrers WHERE message_id=$1", )
                     if starrers:
                         old_starrers = starrers["starrers"]
             else:
@@ -169,7 +177,7 @@ class Star(commands.Cog):
                         break
             except:
                 pass
-            await self.update_starrers(new_starrers, message_id, starboard_data["original_message_id"])
+            await self.update_starrers(new_starrers, message_id, starboard_message)
             message_data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE original_message_id=$1 OR starboard_message_id=$1", message_id)
             if not message_data:
                 return await ctx.send("A message with that ID does not exist in the starboard channel or in this channel")
@@ -222,7 +230,7 @@ class Star(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     async def remove(self, ctx, message_id:int):
         '''Removes a message from the starboard'''
-        starboard_channel, needed = await self.get_starboard_channel(ctx.guild.id)
+        starboard_channel = await self.get_starboard_channel(ctx.guild.id)
         if not starboard_channel:
             return await ctx.send("This guild doesnt have a starboard channel set up. You should set one up now.")
         channel = self.bot.get_channel(starboard_channel)
@@ -249,7 +257,7 @@ class Star(commands.Cog):
     @commands.has_permissions(manage_channels=True)
     async def start(self, ctx, channel:discord.TextChannel, needed:int=3):
         '''Starts the starboard in the channel provided with the given amount of stars needed'''
-        starboard_channel, needed = await self.get_starboard_channel( ctx.guild.id)
+        starboard_channel = await self.get_starboard_channel(ctx.guild.id)
         if starboard_channel:
             return await ctx.send("You already have a starboard channel set up, use the star delete command to start over.")
         await self.bot.db.execute("INSERT INTO star_channels VALUES ($1, $2, $3)", ctx.guild.id, channel.id, needed)
@@ -270,7 +278,7 @@ class Star(commands.Cog):
         '''Changes how many stars are needed to star a message.'''
         if needed <= 0:
             return await ctx.send("You need to have at least one star necessary.")
-        starboard_channel, needed = await self.get_starboard_channel( ctx.guild.id)
+        starboard_channel = await self.get_starboard_channel(ctx.guild.id)
         if not starboard_channel:
             return await ctx.send("You don't have a starboard channel in this guild, use the start command to make one.")
         await self.bot.db.execute("UPDATE star_channels SET needed=$1 WHERE guild_id=$2", needed, ctx.guild.id)
@@ -280,7 +288,7 @@ class Star(commands.Cog):
     @commands.guild_only()
     async def show(self, ctx, message_id:int):
         '''Shows the starred message for the id'''
-        starboard_channel, needed = await self.get_starboard_channel( ctx.guild.id)
+        starboard_channel = await self.get_starboard_channel(ctx.guild.id)
         if not starboard_channel:
             return await ctx.send("This guild doesn't have a starboard set up.")
         else:
@@ -299,7 +307,7 @@ class Star(commands.Cog):
     @commands.guild_only()
     async def random(self, ctx):
         '''Shows a random starboard message'''
-        starboard_channel, needed = await self.get_starboard_channel( ctx.guild.id)
+        starboard_channel = await self.get_starboard_channel(ctx.guild.id)
         if not starboard_channel:
             return await ctx.send("This guild doesn't have a starboard set up.")
         message_data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE channel_id=$1 OFFSET FLOOR(RANDOM() * (SELECT COUNT(*) FROM starboard WHERE channel_id=$1)) LIMIT 1", starboard_channel)
@@ -321,7 +329,7 @@ class Star(commands.Cog):
     @commands.guild_only()
     async def stats(self, ctx):
         '''Shows star stats for this guild'''
-        starboard_channel, needed = await self.get_starboard_channel( ctx.guild.id)
+        starboard_channel = await self.get_starboard_channel(ctx.guild.id)
         if not starboard_channel:
             return await ctx.send("This guild doesn't have a starboard set up.")
         star_data = await self.bot.db.fetchrow("SELECT COUNT(starboard_message_id) AS messages, SUM(stars) AS stars FROM starboard WHERE channel_id=$1", starboard_channel)
@@ -374,7 +382,7 @@ class Star(commands.Cog):
     @commands.guild_only()
     async def who(self, ctx, message_id:int):
         '''Shows who starred a message'''
-        starboard_channel, needed = await self.get_starboard_channel( ctx.guild.id)
+        starboard_channel = await self.get_starboard_channel(ctx.guild.id)
         if not starboard_channel:
             return await ctx.send("This guild doesn't have a starboard set up.")
         message_data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE original_message_id=$1 or starboard_message_id=$1", message_id)
