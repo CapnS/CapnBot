@@ -452,5 +452,31 @@ class Star(commands.Cog):
         except:
             await ctx.send("There are no starred messages in this guild.")
 
+    @star.command()
+    @commands.guild_only()
+    async def who(self, ctx, message_id:int):
+        '''Shows who starred a message'''
+        channel_data = await self.bot.db.fetchrow("SELECT * FROM star_channels WHERE guild_id=$1", ctx.guild.id)
+        if not channel_data:
+            return await ctx.send("This guild doesn't have a starboard set up.")
+        message_data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE original_message_id=$1", message_id)
+        if not message_data:
+            message_data = await self.bot.db.fetchrow("SELECT * FROM starboard WHERE starboard_message_id=$1", message_id)
+            if not message_data:
+                return await ctx.send("That message was not found in the starboard.")
+        starrers = await self.bot.db.fetchrow("SELECT * FROM starrers WHERE message_id=$1", message_data["original_message_id"])
+        users = ""
+        for starrer in starrers["starrers"]:
+            user = self.bot.get_user(starrer)
+            if not user:
+                users+=" - "+str(starrer)+"\n"
+                continue
+            users+=" - "+user.display_name+"\n"
+        gold = discord.Color.gold()
+        em = discord.Embed(title="Starrers", description=users, color=gold)
+        await ctx.send(embed=em)
+
+
+
 def setup(bot):
     bot.add_cog(Star(bot))
