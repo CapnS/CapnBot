@@ -297,7 +297,8 @@ async def on_message(message):
     if message.author.id in bot.blacklist:
         return
     if message.content.endswith("?"):
-        prefix = await get_prefixes(bot, message)[0]
+        prefixes = await get_prefixes(bot, message)
+        prefix = prefixes[0]
         message.content = prefix + message.content[:-1]
     await bot.process_commands(message)
 
