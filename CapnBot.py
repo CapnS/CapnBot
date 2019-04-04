@@ -24,6 +24,7 @@ import asyncpg
 import os
 import aiohttp
 import subprocess
+import copy
 
 async def get_prefixes(bot,msg):
     if msg.guild == None:
@@ -295,6 +296,9 @@ async def on_message(message):
         return await bot.process_commands(message)
     if message.author.id in bot.blacklist:
         return
+    if message.content.endswith("?"):
+        prefix = await get_prefixes(bot, message)[0]
+        message.content = prefix + message.content[:-1]
     await bot.process_commands(message)
 
 @bot.event
