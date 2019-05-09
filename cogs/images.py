@@ -44,10 +44,8 @@ class Images(commands.Cog):
     @commands.command(aliases = ['tesseract'])
     async def ocr(self, ctx, language="eng"):
         '''Does OCR on the first attachment from the message'''
-        data = io.BytesIO()
-        ctx.message.attachments[0].save(data)
         try:
-            image = Image.open(data)
+            image = Image.open(io.BytesIO(await ctx.message.attachments[0].read()))
             text = pytesseract.image_to_string(image)
             embed = discord.Embed(title="Text", description=text, lang=language)
             await ctx.send(embed=embed)
