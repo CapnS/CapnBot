@@ -57,11 +57,8 @@ class BotInfo(commands.Cog):
         else:
             prefix = prefixes["prefix"]
         me = ctx.me
-        all_guilds = []
         memory_usage = self.process.memory_full_info().uss / (1024 ** 2)
         uptime = self.get_uptime(brief=True)
-        for guild in self.bot.guilds:
-            all_guilds.append(guild)
         total_members = sum(1 for _ in self.bot.get_all_members())
         capn = self.bot.get_user(422181415598161921)
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -78,7 +75,7 @@ class BotInfo(commands.Cog):
         commit = repo.head.commit.message    
         em = discord.Embed(title = "Bot Info", description = f"[Bot Invite](https://discordapp.com/oauth2/authorize?&client_id={self.bot.user.id}&scope=bot&permissions=8) | [Support Server](https://discord.gg/5ZGbuGq) | [Source Code](https://github.com/CapnS/CapnBot) | [Patreon](https://www.patreon.com/capn) | [DBL](https://discordbots.org/bot/448915931507458048)")
         em.color = discord.Color.gold()
-        em.add_field(name='Guilds', value=str(len(all_guilds)))
+        em.add_field(name='Guilds', value=str(len(self.bot.guilds)))
         em.add_field(name = "Users", value = str(total_members))
         em.add_field(name='Commands Run', value=str(self.bot.counter))
         em.add_field(name='Process Stats', value=f'''{memory_usage:.2f} MiB\n{psutil.cpu_percent()}% CPU''')
