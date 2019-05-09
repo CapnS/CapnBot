@@ -46,7 +46,9 @@ class Images(commands.Cog):
         '''Does OCR on the first attachment from the message'''
         try:
             image = Image.open(io.BytesIO(await ctx.message.attachments[0].read()))
-            text = pytesseract.image_to_string(image)
+            def tesseract():
+                return pytesseract.image_to_string(image)
+            text = await self.bot.loop.run_in_executor(None, tesseract)
             embed = discord.Embed(title="Text", description=text, lang=language)
             await ctx.send(embed=embed)
         except:
