@@ -334,7 +334,7 @@ class Games(commands.Cog):
     async def domove(self,grids,player,n,message,ctx,user):
         move=0
         while not 0 < move <= 7:
-            await ctx.send(f"Which coloumn do you want to place your checker in Player {player}(1-{7})")
+            m = await ctx.send(f"Which coloumn do you want to place your checker in Player {player}(1-{7})")
             if player == 1:
                 def check(message):
                     return message.author == ctx.author and message.clean_content.isdigit()
@@ -363,6 +363,8 @@ class Games(commands.Cog):
                     num+=1
             else:
                 grids[num-1][move-1]=player
+        await msg.delete()
+        await m.delete()
         await self.check_if_won(grids,player,n,message,ctx,user)
         
         
